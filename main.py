@@ -134,6 +134,7 @@ if __name__ == "__main__":
     第34行: 作者名及所占字符数
     第56行: 铺师名及所占字符数
     第78行: 歌曲难度
+    第9行:  BPM
 ========================================
     | 铺面信息 - score
     使用方法：
@@ -387,7 +388,7 @@ if __name__ == "__main__":
                         self.Skip_Intro = True
                 sleep(1.75)
                 
-            sleep(0.133)
+            sleep(0.117)
             os.system("cls")
             pygame.mixer.music.set_pos(16.2)
             for i in range(39):
@@ -1069,13 +1070,23 @@ if __name__ == "__main__":
                 return Temp
         
         def Play_Beats(self):
-            print("playbeat")
-            sleep(1)
-            while pygame.mixer.music.get_busy():
-                for i in range(self.Local_beats):
-                    thread = threading.Thread(target=playthings.Play_Beat_Sound)
-                    thread.start()
-                    sleep(self.Local_interval_time)
+            for i in range(5):
+                if pygame.mixer.music.get_busy():
+                    while self.Keep_Playing:
+                        for i in range(self.Local_beats):
+                            # print("当前音符：" + str(self.Local_Note) + "\n当前节拍/s:" + str(60/int(Song_List[self.Located_Song][8])) + "节拍间隔：" + str(Score_List[self.Located_Song][len(Score_List[self.Located_Song])-1][0] - Score_List[self.Located_Song][self.Local_beats][0]))
+                            thread = threading.Thread(target=playthings.Play_Beat_Sound)
+                            thread.start()
+                            sleep(60/int(Score_List[self.Located_Song][self.Local_beats][self.Local_Note][6]))
+                        self.Local_Note += 1
+                        
+                        # note间隔时间
+                        if self.Local_Note == int(len(Score_List[self.Located_Song]))-1 :
+                            pass
+                        else:
+                            sleep(int(Score_List[self.Located_Song][self.Local_Note+1][0]) - int(Score_List[self.Located_Song][self.Local_beats][0]))
+                    return
+                sleep(0.01)
         
         def Start_Play(self,song_index):
             pygame.mixer.music.fadeout(400)
@@ -1146,26 +1157,17 @@ if __name__ == "__main__":
                     else:
                         print(self.Play_Screen_1Track_Effect[i])
             
-            thread = threading.Thread(target=self.Play_Song)
-            thread.start()
-            
-            Keep_Playing = True
+            self.Keep_Playing = True
             self.Local_Note = 0
             self.Local_Song_Note_HP = int(self.Cal_HP(len(Score_List[self.Located_Song]),Song_List[self.Located_Song][6]))
             self.Local_beats = 7
             self.Local_interval_time = 0.3
             
-            thread2 = threading.Thread(target=self.Play_Beats)
-            thread2.start()
-            while Keep_Playing:
-                
-                
-                
-                
-                
-                
-                
-                
+            Playing_Beats = False
+            sleep(0.2)
+            thread = threading.Thread(target=self.Play_Song)
+            thread.start()
+            while self.Keep_Playing:
                 Print_Refresh_Play_Screen()
                 self.Local_beats = int(Score_List[self.Located_Song][self.Local_Note][4])
                 self.Local_interval_time = int(Score_List[self.Located_Song][self.Local_Note][5])/1000
@@ -1186,8 +1188,14 @@ if __name__ == "__main__":
                 if keyboard.is_pressed("esc"):
                     break
                 if pygame.mixer.music.get_busy == False:
-                    Keep_Playing = False
+                    self.Keep_Playing = False
                     sleep(1)
+                if Playing_Beats == False:
+                    thread2 = threading.Thread(target=self.Play_Beats)
+                    thread2.start()
+                    Playing_Beats = True
+                else:
+                    pass
                 sleep(0.075)
             
             
@@ -1233,8 +1241,6 @@ if __name__ == "__main__":
                     self.UpdateRequests = requests.get("http://tbdriver.ml/Version/MathBeats.zip",headers={"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                                                                                                             "Accept-Encoding": "gzip, deflate",
                                                                                                             "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-                                                                                                            "Connection": "keep-alive",
-                                                                                                            "Cookie": "_test=afd3271f21a8bd773ef9ebc1cb0365ff; Imvf_2132_saltkey=neo6sODq; Imvf_2132_lastvisit=1669344735; Imvf_2132_study_nge_extstyle=auto; Imvf_2132_study_nge_extstyle_default=auto; Imvf_2132_visitedfid=40; Imvf_2132_seccodecSp9m0HZ=1.a7a0fb79e8f903a313; Imvf_2132_st_t=0%7C1669462500%7Cdd3bddd38e6928f94cb45edac7b04347; Imvf_2132_forum_lastvisit=D_40_1669443892D_2_1669462500; Imvf_2132_st_p=0%7C1669462504%7C61fe45f84d864c7fa6f5d5965944ffe0; Imvf_2132_viewid=tid_6; sc_is_visitor_unique=rx9692532.1669550374.6A7E70568E854F3BFC6A097C35278839.1.1.1.1.1.1.1.1.1",
                                                                                                             "Pragma": "no-cache",
                                                                                                             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.56"})
                     with open(".\cache\download.zip",'wb') as f:
@@ -1336,6 +1342,6 @@ if __name__ == "__main__":
             global BGMControler
             BGMControler = False
             
-
+    # X  X X XXX  X  X X XXXX(八分)  X XX XXXX  X X X X(四连音)
     System_Main = MathBeats_Main()
     System_Main.start()

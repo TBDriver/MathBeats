@@ -29,4 +29,5 @@ class playmain():
     
     def Play_Beat_Sound(self):
         SoundPlayer = pygame.mixer.Sound("./data/sound/tap.wav")
+        SoundPlayer.set_volume(0.8)
         SoundPlayer.play()
