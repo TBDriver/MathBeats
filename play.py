@@ -31,3 +31,18 @@ class playmain():
         SoundPlayer = pygame.mixer.Sound("./data/sound/tap.wav")
         SoundPlayer.set_volume(0.8)
         SoundPlayer.play()
+    
+    def Play_Full_Recall(self):
+        SoundPlayer = pygame.mixer.Sound("./sound/track_clear.wav")
+        SoundPlayer.set_volume(2)
+        SoundPlayer.play()
+    
+    def Play_Track_Fail(self):
+        SoundPlayer = pygame.mixer.Sound("./sound/track_fail.wav")
+        SoundPlayer.set_volume(2)
+        SoundPlayer.play()
+    
+    def Play_Pure_Memory(self):
+        SoundPlayer = pygame.mixer.Sound("./sound/track_pure.wav")
+        SoundPlayer.set_volume(2)
+        SoundPlayer.play()

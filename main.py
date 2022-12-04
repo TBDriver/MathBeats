@@ -94,8 +94,6 @@ if __name__ == "__main__":
     try:    os.mkdir(".\cache")
     except: pass
     with open(".\config\config.mb","r+") as f:
- 
- 
         READ_CONFIG_DATA = f.read() # 读取设置
         CONFIG_DATA = READ_CONFIG_DATA.split("\n")
     with open(".\config\save.mb","r+") as f:
@@ -169,7 +167,7 @@ if __name__ == "__main__":
                 continue
     def Play_BGM():
         pygame.mixer.music.load("./data/sound/" + "bgm_full.ogg")
-        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.set_volume(0.35)
         pygame.mixer.music.play()
         while BGMControler:
             if pygame.mixer.music.get_busy():
@@ -388,7 +386,7 @@ if __name__ == "__main__":
                         self.Skip_Intro = True
                 sleep(1.75)
                 
-            sleep(0.117)
+            sleep(0.1167)
             os.system("cls")
             pygame.mixer.music.set_pos(16.2)
             for i in range(39):
@@ -1049,8 +1047,6 @@ if __name__ == "__main__":
                 self.Start_Play(self.Located_Song)
                     
         def Play_Song(self):
-            print(self.Located_Song)
-            sleep(4)
             pygame.mixer.music.load("./data/music/" + Songs[self.Located_Song] + "/music.mp3")
             pygame.mixer.music.set_volume(4)
             pygame.mixer.music.play()
@@ -1070,25 +1066,36 @@ if __name__ == "__main__":
                 return Temp
         
         def Play_Beats(self):
+            self.Local_beats = 0
+            exit_it = False
+            sleep(1)
+            self.Able_to_Touch = True
             for i in range(5):
-                if pygame.mixer.music.get_busy():
+                if exit_it == True:
+                  continue  
+                elif pygame.mixer.music.get_busy():
                     while self.Keep_Playing:
-                        for i in range(self.Local_beats):
+                        for j in range(int(Score_List[self.Located_Song][self.Local_Note][4])):
                             # print("当前音符：" + str(self.Local_Note) + "\n当前节拍/s:" + str(60/int(Song_List[self.Located_Song][8])) + "节拍间隔：" + str(Score_List[self.Located_Song][len(Score_List[self.Located_Song])-1][0] - Score_List[self.Located_Song][self.Local_beats][0]))
+                            self.Local_beats += 1
                             thread = threading.Thread(target=playthings.Play_Beat_Sound)
                             thread.start()
-                            sleep(60/int(Score_List[self.Located_Song][self.Local_beats][self.Local_Note][6]))
-                        self.Local_Note += 1
-                        
+                            sleep(60/int(Score_List[self.Located_Song][self.Local_Note][6]))
                         # note间隔时间
-                        if self.Local_Note == int(len(Score_List[self.Located_Song]))-1 :
-                            pass
+                        if self.Local_Note >= int(len(Score_List[self.Located_Song]))-1:
+                            exit_it = True
+                            self.Able_to_Touch = False
+                            break
                         else:
-                            sleep(int(Score_List[self.Located_Song][self.Local_Note+1][0]) - int(Score_List[self.Located_Song][self.Local_beats][0]))
+                            sleep(int(Score_List[self.Located_Song][self.Local_Note+1][0]) - int(Score_List[self.Located_Song][self.Local_Note][0]))
+                        self.Local_Note += 1
+                        self.Local_beats = 0
                     return
                 sleep(0.01)
         
         def Start_Play(self,song_index):
+            thread = threading.Thread(target=playthings.Play_Song_Confirm)
+            thread.start()
             pygame.mixer.music.fadeout(400)
             global BGMControler
             BGMControler = False
@@ -1132,9 +1139,7 @@ if __name__ == "__main__":
                          '|                                                                                                                      |',
                          '|                                                                                                                      |',
                          '========================================================================================================================']
-            thread = threading.Thread(target=playthings.Play_Song_Confirm)
-            thread.start()
-            self.Change_By_Fade_Effect(self.Play_Screen_1Track_Effect)
+            self.Change_By_Fade_Effect(self.Play_Screen_1Track_Effect)  
             def Print_Refresh_Play_Screen():
                 # 一次屏幕打印
                 os.system("cls")
@@ -1150,55 +1155,100 @@ if __name__ == "__main__":
                             print(" ",end="")
                         print("]{:02} |".format(self.NowHP))
                     elif i == 4:
-                        print('|          ' + Score_List[self.Located_Song][self.Local_Note][1],end="")
-                        for m in range(120-11-2-int(Score_List[self.Located_Song][self.Local_Note][2])):
-                            print(" ",end="")
+                        if self.Local_Note >= int(len(Score_List[self.Located_Song]))-1:
+                            print('|          ' + Score_List[self.Located_Song][self.Local_Note-1][1],end="")
+                            for m in range(120-11-2-int(Score_List[self.Located_Song][self.Local_Note-1][2])):
+                                print(" ",end="")
+                        else:
+                            print('|          ' + Score_List[self.Located_Song][self.Local_Note][1],end="")
+                            for m in range(120-11-2-int(Score_List[self.Located_Song][self.Local_Note][2])):
+                                print(" ",end="")
+                            
                         print(" |")
+                    elif i == 19:
+                        if self.Local_beats >= int((Score_List[self.Located_Song][self.Local_Note][4])):
+                            print("|                                       ----- ----- ----- ----- ----- ----- " + Back.RED + Fore.BLACK + "--|--" + Back.BLACK + Fore.LIGHTWHITE_EX + "                                      |")
+                        else:
+                            if self.Local_beats == 0:
+                                print("|                                       " + Back.RED + Fore.BLACK + "--|--" + Back.BLACK + Fore.LIGHTWHITE_EX + " ----- ----- ----- ----- ----- -----                                      |")
+                            if self.Local_beats == 1:
+                                print("|                                       ----- " + Back.RED + Fore.BLACK + "--|--" + Back.BLACK + Fore.LIGHTWHITE_EX + " ----- ----- ----- ----- -----                                      |")
+                            if self.Local_beats == 2:
+                                print("|                                       ----- ----- " + Back.RED + Fore.BLACK + "--|--" + Back.BLACK + Fore.LIGHTWHITE_EX + " ----- ----- ----- -----                                      |")
+                            if self.Local_beats == 3:
+                                print("|                                       ----- ----- ----- " + Back.RED + Fore.BLACK + "--|--" + Back.BLACK + Fore.LIGHTWHITE_EX + " ----- ----- -----                                      |")
+                            if self.Local_beats == 4:
+                                print("|                                       ----- ----- ----- ----- " + Back.RED + Fore.BLACK + "--|--" + Back.BLACK + Fore.LIGHTWHITE_EX + " ----- -----                                      |")
+                            if self.Local_beats == 5:
+                                print("|                                       ----- ----- ----- ----- ----- " + Back.RED + Fore.BLACK + "--|--" + Back.BLACK + Fore.LIGHTWHITE_EX + " -----                                      |")
+                            if self.Local_beats == 6:
+                                print("|                                       ----- ----- ----- ----- ----- ----- " + Back.RED + Fore.BLACK + "--|--" + Back.BLACK + Fore.LIGHTWHITE_EX + "                                      |")
                     else:
                         print(self.Play_Screen_1Track_Effect[i])
             
+            sleep(1)
             self.Keep_Playing = True
             self.Local_Note = 0
             self.Local_Song_Note_HP = int(self.Cal_HP(len(Score_List[self.Located_Song]),Song_List[self.Located_Song][6]))
-            self.Local_beats = 7
-            self.Local_interval_time = 0.3
+            self.Local_interval_time = int(Score_List[self.Located_Song][self.Local_Note][5])/1000
+            self.Able_to_Touch = True
             
             Playing_Beats = False
             sleep(0.2)
+            
             thread = threading.Thread(target=self.Play_Song)
             thread.start()
+            global Note_Floating_Value
+            Note_Floating_Value = float(Score_List[self.Located_Song][self.Local_Note][0])
+            '''
+            To do:
+            分离打印和判断note
+            '''
+            
+            
+            
             while self.Keep_Playing:
-                Print_Refresh_Play_Screen()
-                self.Local_beats = int(Score_List[self.Located_Song][self.Local_Note][4])
-                self.Local_interval_time = int(Score_List[self.Located_Song][self.Local_Note][5])/1000
                 if keyboard.is_pressed("enter"):
-                    Note_Floating_Value = float(Score_List[self.Located_Song][self.Local_Note][0])
-                    if Score_List[self.Located_Song][self.Local_Note][3] == "1":
-                        # Perfect判定
-                        if pygame.mixer.music.get_pos() + 50 >= Note_Floating_Value and pygame.mixer.music.get_pos() - 50 <= Note_Floating_Value:
-                            self.NowHP += self.Local_Song_Note_HP
-                            thread = threading.Thread(target=playthings.Play_Hit_Sound)
+                    if self.Able_to_Touch:
+                        if self.Local_Note >= int(len(Score_List[self.Located_Song]))-1:
+                            pass
+                        else:
+                            Note_Floating_Value = float(Score_List[self.Located_Song][self.Local_Note][0])
+                        if Score_List[self.Located_Song][self.Local_Note][3] == "1":
+                            # 判定Lost
+                            if pygame.mixer.music.get_pos() + 200 >= Note_Floating_Value and pygame.mixer.music.get_pos() - 200 <= Note_Floating_Value:
+                                # 判定Far
+                                if pygame.mixer.music.get_pos() + 100 >= Note_Floating_Value and pygame.mixer.music.get_pos() - 100 <= Note_Floating_Value:
+                                    if pygame.mixer.music.get_pos() + 50 >= Note_Floating_Value and pygame.mixer.music.get_pos() - 50 <= Note_Floating_Value:
+                                        # Pure
+                                        self.NowHP += self.Local_Song_Note_HP
+                                        thread = threading.Thread(target=playthings.Play_Hit_Sound)
+                                        thread.start()
+                        else:
+                            if self.NowHP >= 7:
+                                self.NowHP -= 8
+                            thread = threading.Thread(target=playthings.Play_Lost_Sound)
                             thread.start()
-                    else:
-                        if self.NowHP >= 7:
-                            self.NowHP -= 8
-                        thread = threading.Thread(target=playthings.Play_Lost_Sound)
-                        thread.start()
-                    
-                if keyboard.is_pressed("esc"):
-                    break
-                if pygame.mixer.music.get_busy == False:
-                    self.Keep_Playing = False
-                    sleep(1)
                 if Playing_Beats == False:
                     thread2 = threading.Thread(target=self.Play_Beats)
                     thread2.start()
                     Playing_Beats = True
-                else:
+                if pygame.mixer.music.get_busy() == False:
+                    self.Keep_Playing = False
+                    sleep(1)
+                Print_Refresh_Play_Screen()
+                if self.Local_Note >= int(len(Score_List[self.Located_Song]))-1:
                     pass
+                else:
+                    self.Local_interval_time = int(Score_List[self.Located_Song][self.Local_Note][5])/1000
                 sleep(0.075)
             
+            # 检测通关与否并播放音频
+            if self.NowHP == 100:
+                pass
             
+            
+            # 回到界面
             Play_BGM()
             BGMControler = True
             thread1 = threading.Thread(target=Play_BGM)
