@@ -1,10 +1,12 @@
 if __name__ == "__main__":
     from time import sleep,gmtime
-    from math import pow
     import os,pygame,random # ,bezier
     from sys import exit
     import threading
+    import widgets
     pygame.init()
+    Widgets = widgets.MathBeatsWidgets()
+    
     
     # 加载文件
     # 加载存档与设置
@@ -21,6 +23,7 @@ if __name__ == "__main__":
     with open(".\config\save.mb","r+") as f:
         global Save_Time
         Save_Time = gmtime(os.path.getmtime(".\config\save.mb"))
+    
     
     # 加载歌曲
     global Song_List
@@ -67,21 +70,32 @@ if __name__ == "__main__":
     
     
     class MathBeats():
-        def __init_fonts(self):
-            pygame.font.init() # 文字库初始化
-            self.titleFont = pygame.font.Font(".\data\\ttf\\方正准雅宋简体.TTF",50)
-            
-            
+        def __returnPass(self):
+            '''
+            返回pass的函数,无实际意义
+            '''
+            def return_():
+                pass
+            return return_
+        def __fontInit(self):
+            # 字体简称
+            self.z准雅宋 = ".\\data\\ttf\\方正准雅宋简体.ttf"
+            self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
+            self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
+            self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
             
         def __init__(self):
             self.Main_Screen = pygame.display.set_mode(size=(1054,600))
             self.Game_State = "start"
             self.Game_FPS = 120    # FPS
             self.Game_Tick = pygame.time.Clock()
-            self.Antialias = False # 抗锯齿
+            self.Antialias = True # 抗锯齿
             self.LastM1 = 0
             self.LastM2 = 0
-            self.__init_fonts()  # 字体初始化
+            
+            self.buttonID = [] # 按钮ID初始化
+            self.__fontInit()  # 文字封装初始化
+            pygame.font.init() # 文字库初始化
             pygame.display.set_caption("Mathbeats")
             # self.Update_Smooth()
         
@@ -118,14 +132,37 @@ if __name__ == "__main__":
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.flip() #更新屏幕内容
         
-        def Rendering(self):
+        def showAButton(self, text: int, size: str, font: str, color: tuple, buttonX: int, buttonY: int, renderSurface: pygame.Surface, antialias: bool, buttonID: int, functions =__returnPass, backgroundColor: tuple = (255,255,255)):
             '''
-            按照顺序渲染游戏
-            防止出现顺序错误
+            text: 按钮文本         字符串
+            size: 文本大小         整型
+            font: 使用字体路径     字符串
+            color:文本颜色         元组    其中接受三个参数
+            buttonX&Y 按钮xy值     整型    用于按钮置放和悬停表现
+            antialias: 抗锯齿与否  布尔值
+            buttonID: 按钮唯一ID   整型
+            functions: 执行函数    函数    可选
+            renderSurface: 作用Surface对象
             '''
+            if not functions:
+                functionToDo = functions
+            else:
+                def functionToDo():
+                    pass
+            
+            buttonFont = pygame.font.Font(font,size) # 加载字符
+            renderSurface.blit(buttonFont.render(text, antialias, color, backgroundColor), (buttonX,buttonY)) # 渲染文字
 
             
-            
+            for event in pygame.event.get():
+                if (event.type == pygame.MOUSEMOTION or event.type == pygame.MOUSEBUTTONDOWN):
+                    inTheButton = (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont,text))[1])
+                    if inTheButton: # 悬停事件
+                        self.buttonID[buttonID][0] = self.buttonID[buttonID][2]
+                    else:
+                        self.buttonID[buttonID][0] = self.buttonID[buttonID][1]
+                if event.type == pygame.MOUSEBUTTONUP and event.pos[0] <= buttonX and event.pos[1] >= buttonY: # 按下按钮
+                    functionToDo()
         
         def beforeChangeTo(self):
             def __change_temp():
@@ -211,25 +248,21 @@ if __name__ == "__main__":
             _temp_thread = threading.Thread(target=__change_temp)
             _temp_thread.start()
             
-        def Main_Screen(self):
+        def Main_Screen_(self):
+            self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)]) # 开始游戏按钮ID
+            
             self.beforeChangeTo()
-            sleep(3)
+            sleep(2.2)
             def _render_start_game():
                 # _render_start_game作为加载时预处理的图像
-                self.Main_Screen.blit(self.titleFont.render("开始游戏", True, (255,255,255)),(200,200))
-            
-            
-            
+                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.temp, self.buttonID[0][0])
             self.afterChangeTo(_render_start_game)
-            sleep(4)
-            #startGame = 
+            sleep(2.2)
+            
+            
             while True:
                 self.Main_Screen.fill((34,40,49))
-                
-                titleFont = pygame.font.Font(".\\data\\ttf\\方正准雅宋简体.TTF",50)
-                self.Main_Screen.blit(titleFont.render("开始游戏", True, (255,255,255)),(200,200))
-                
-                
+                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.temp, self.buttonID[0][0])
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.update()
                 
@@ -237,9 +270,12 @@ if __name__ == "__main__":
             #startGameRect = startGame.get_rect()
             #startGameRect.center = (300,200)
             #self.Main_Screen.blit(startGameRect)
-            while True:
-                pass
         
+        def temp(self):
+            print("on it")
+        
+        def getIntoGame(self, songs):
+            pass
         
         def Keep_Flip(self):
             while True:
@@ -247,7 +283,7 @@ if __name__ == "__main__":
                 if self.Game_State == "start":
                     self.Start_Screen() # 进入开始屏幕的循环
                 if self.Game_State == "play":
-                    self.Main_Screen()
+                    self.Main_Screen_()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         #卸载所有模块
