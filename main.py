@@ -144,7 +144,7 @@ if __name__ == "__main__":
             functions: 执行函数    函数    可选
             renderSurface: 作用Surface对象
             '''
-            if not functions:
+            if not functions == self.__returnPass:
                 functionToDo = functions
             else:
                 def functionToDo():
@@ -161,7 +161,7 @@ if __name__ == "__main__":
                         self.buttonID[buttonID][0] = self.buttonID[buttonID][2]
                     else:
                         self.buttonID[buttonID][0] = self.buttonID[buttonID][1]
-                if event.type == pygame.MOUSEBUTTONUP and event.pos[0] <= buttonX and event.pos[1] >= buttonY: # 按下按钮
+                if event.type == pygame.MOUSEBUTTONUP and (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont,text))[1]): # 按下按钮
                     functionToDo()
         
         def beforeChangeTo(self):
@@ -252,12 +252,12 @@ if __name__ == "__main__":
             self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)]) # 开始游戏按钮ID
             
             self.beforeChangeTo()
-            sleep(2.2)
+            sleep(2)
             def _render_start_game():
                 # _render_start_game作为加载时预处理的图像
                 self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.temp, self.buttonID[0][0])
             self.afterChangeTo(_render_start_game)
-            sleep(2.2)
+            sleep(2)
             
             
             while True:
