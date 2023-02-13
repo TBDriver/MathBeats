@@ -1,6 +1,6 @@
 if __name__ == "__main__":
     from time import sleep,gmtime
-    import os,pygame,random # ,bezier
+    import os, pygame, random, json # ,bezier
     from sys import exit
     import threading
     import widgets
@@ -32,21 +32,13 @@ if __name__ == "__main__":
     Songs = os.listdir(".\data\music")
     for i in range(len(Songs)): # 查找歌曲
         Song_List.append([]) # 增加一首歌的槽位
-        Score_List.append([]) # 增加一首歌的铺面
         with open(".\data\music\\" + Songs[i-1] + "\song.ini",encoding='utf-8') as f:
             for line in f:
                 Song_List[i].append(line.strip())
-        with open(".\data\music\\" + Songs[i-1] + ".\score",encoding="utf-8") as f:
-            Local_Operation = 0 # 当前读取铺面note
-            for line in f:
-                if line.strip() == "start":
-                    # 开始读取铺面Local Note
-                    Score_List[i].append([]) # 当前铺面第i-1个note
-                elif line.strip() == "stop":
-                    Local_Operation += 1 # 读取完成
-                else:
-                    Score_List[i][Local_Operation].append(line.strip()) # 谱堆 谱面 note
-        
+        with open(".\data\music\\" + Songs[i-1] + ".\score.json",encoding="utf-8") as f:
+            Score_List.append(json.load(f))
+            print(Score_List)
+    
     '''
     | 歌曲信息 - song.ini
     第12行: 歌曲名及所占字符数
@@ -57,33 +49,30 @@ if __name__ == "__main__":
 ========================================
     | 铺面信息 - score
     使用方法：
-    Score_List[谱面索引][Note索引][操作]
+    Score_List[谱面索引 -> int] -> 锁定歌曲
+              [Note索引 -> str] -> 锁定音符
+              [Note信息 -> int] -> 锁定信息
     
-    操作对应：
-    0  开始时间(ms)
-    1     题目
-    2  题目所占字符      共6项
-    3     结果
-    4     拍数
-    5  每拍时间(ms)
+    Note信息 对应:
+    0 字典   每拍间隔
+    1 字符串 题目
+    2 布尔值 正确与否
+    3 字符串 特殊动作
     '''
     
-    
     class MathBeats():
-        def __returnPass(self):
+        # 预处理
+        def __return6(self):
             '''
-            返回pass的函数,无实际意义
+            返回6的函数,无实际意义
             '''
-            def return_():
-                pass
-            return return_
+            print("return")
         def __fontInit(self):
             # 字体简称
             self.z准雅宋 = ".\\data\\ttf\\方正准雅宋简体.ttf"
             self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
             self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
             self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
-            
         def __init__(self):
             self.Main_Screen = pygame.display.set_mode(size=(1054,600))
             self.Game_State = "start"
@@ -98,7 +87,6 @@ if __name__ == "__main__":
             pygame.font.init() # 文字库初始化
             pygame.display.set_caption("Mathbeats")
             # self.Update_Smooth()
-        
         '''
         摆了 会用公式不知道怎么应用
         
@@ -132,7 +120,11 @@ if __name__ == "__main__":
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.flip() #更新屏幕内容
         
-        def showAButton(self, text: int, size: str, font: str, color: tuple, buttonX: int, buttonY: int, renderSurface: pygame.Surface, antialias: bool, buttonID: int, functions =__returnPass, backgroundColor: tuple = (255,255,255)):
+        # 功能性函数
+        def showAButton(self, text: int, size: str, font: str, 
+                        color: tuple, buttonX: int, buttonY: int, renderSurface: pygame.Surface, 
+                        antialias: bool, buttonID: int, functions, 
+                        backgroundColor: tuple = (255,255,255)):
             '''
             text: 按钮文本         字符串
             size: 文本大小         整型
@@ -144,16 +136,10 @@ if __name__ == "__main__":
             functions: 执行函数    函数    可选
             renderSurface: 作用Surface对象
             '''
-            if not functions == self.__returnPass:
-                functionToDo = functions
-            else:
-                def functionToDo():
-                    pass
             
             buttonFont = pygame.font.Font(font,size) # 加载字符
             renderSurface.blit(buttonFont.render(text, antialias, color, backgroundColor), (buttonX,buttonY)) # 渲染文字
 
-            
             for event in pygame.event.get():
                 if (event.type == pygame.MOUSEMOTION or event.type == pygame.MOUSEBUTTONDOWN):
                     inTheButton = (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont,text))[1])
@@ -162,8 +148,8 @@ if __name__ == "__main__":
                     else:
                         self.buttonID[buttonID][0] = self.buttonID[buttonID][1]
                 if event.type == pygame.MOUSEBUTTONUP and (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont,text))[1]): # 按下按钮
-                    functionToDo()
-        
+                    functions
+            
         def beforeChangeTo(self):
             def __change_temp():
                 # To do:减少时间 太慢了哈哈哈哈
@@ -247,40 +233,35 @@ if __name__ == "__main__":
                     
             _temp_thread = threading.Thread(target=__change_temp)
             _temp_thread.start()
-            
+        
+        # 界面
         def Main_Screen_(self):
             self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)]) # 开始游戏按钮ID
             
             self.beforeChangeTo()
-            sleep(2)
+            sleep(2.2)
             def _render_start_game():
                 # _render_start_game作为加载时预处理的图像
                 self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame(0), self.buttonID[0][0])
             self.afterChangeTo(_render_start_game)
-            sleep(2)
+            sleep(2.2)
             
             
             while True:
                 self.Main_Screen.fill((34,40,49))
                 self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame(0), self.buttonID[0][0])
+                
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.update()
-                
-            
-            #startGameRect = startGame.get_rect()
-            #startGameRect.center = (300,200)
-            #self.Main_Screen.blit(startGameRect)
         
         def getIntoGame(self, songs):
             while True:
-                
-
+                print("in")
+                break
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.update()
             
-            Score_List[songs]
-            pass
-        
+            
         def Keep_Flip(self):
             while True:
                 # 游戏状态为 开始游戏 
