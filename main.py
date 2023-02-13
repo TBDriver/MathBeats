@@ -272,7 +272,13 @@ if __name__ == "__main__":
             #self.Main_Screen.blit(startGameRect)
         
         def getIntoGame(self, songs):
-            Score_List[songs ]
+            while True:
+                
+
+                self.Game_Tick.tick(self.Game_FPS)
+                pygame.display.update()
+            
+            Score_List[songs]
             pass
         
         def Keep_Flip(self):
