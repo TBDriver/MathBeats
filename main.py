@@ -272,7 +272,7 @@ if __name__ == "__main__":
             #self.Main_Screen.blit(startGameRect)
         
         def getIntoGame(self, songs):
-            Score_List[songs]
+            Score_List[songs ]
             pass
         
         def Keep_Flip(self):
