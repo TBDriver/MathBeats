@@ -255,14 +255,14 @@ if __name__ == "__main__":
             sleep(2)
             def _render_start_game():
                 # _render_start_game作为加载时预处理的图像
-                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.temp, self.buttonID[0][0])
+                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame(0), self.buttonID[0][0])
             self.afterChangeTo(_render_start_game)
             sleep(2)
             
             
             while True:
                 self.Main_Screen.fill((34,40,49))
-                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.temp, self.buttonID[0][0])
+                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame(0), self.buttonID[0][0])
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.update()
                 
@@ -271,10 +271,14 @@ if __name__ == "__main__":
             #startGameRect.center = (300,200)
             #self.Main_Screen.blit(startGameRect)
         
-        def temp(self):
-            print("on it")
-        
         def getIntoGame(self, songs):
+            while True:
+                
+
+                self.Game_Tick.tick(self.Game_FPS)
+                pygame.display.update()
+            
+            Score_List[songs]
             pass
         
         def Keep_Flip(self):
