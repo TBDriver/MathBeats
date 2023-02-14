@@ -148,7 +148,7 @@ if __name__ == "__main__":
                     else:
                         self.buttonID[buttonID][0] = self.buttonID[buttonID][1]
                 if event.type == pygame.MOUSEBUTTONUP and (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont,text))[1]): # 按下按钮
-                    functions
+                    functions()
             
         def beforeChangeTo(self):
             def __change_temp():
