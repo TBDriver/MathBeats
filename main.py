@@ -38,6 +38,7 @@ if __name__ == "__main__":
         with open(".\data\music\\" + Songs[i-1] + ".\score.json",encoding="utf-8") as f:
             Score_List.append(json.load(f))
             print(Score_List)
+            print(Song_List)
     
     '''
     | 歌曲信息 - song.ini
@@ -62,11 +63,13 @@ if __name__ == "__main__":
     
     class MathBeats():
         # 预处理
-        def __return6(self):
+        def __returnSaveNone(self):
             '''
             返回6的函数,无实际意义
             '''
-            print("return")
+            def ___None():
+                pass
+            return ___None
         def __fontInit(self):
             # 字体简称
             self.z准雅宋 = ".\\data\\ttf\\方正准雅宋简体.ttf"
@@ -99,6 +102,13 @@ if __name__ == "__main__":
             self.Slider_Smooth = bezier.Calculator_bezier(0.6,  0.65, 0.35, 0.94, self.Game_FPS)
         '''
         
+        # 过渡函数
+        def _render_start_game(self):
+            # _render_start_game作为加载时预处理的图像
+            self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
+        def _render_chosing_game(self):
+            pass
+        
         def Start_Screen(self):
             keep_screen = True
             while keep_screen:
@@ -124,7 +134,7 @@ if __name__ == "__main__":
         def showAButton(self, text: int, size: str, font: str, 
                         color: tuple, buttonX: int, buttonY: int, renderSurface: pygame.Surface, 
                         antialias: bool, buttonID: int, functions, 
-                        backgroundColor: tuple = (255,255,255)):
+                        backgroundColor: tuple = (255,255,255) ,*songIndex: int):
             '''
             text: 按钮文本         字符串
             size: 文本大小         整型
@@ -135,8 +145,12 @@ if __name__ == "__main__":
             buttonID: 按钮唯一ID   整型
             functions: 执行函数    函数    可选
             renderSurface: 作用Surface对象
+            songIndex: 歌曲索引
             '''
-            
+            if songIndex:
+                pass
+            else:
+                songIndex = -1
             buttonFont = pygame.font.Font(font,size) # 加载字符
             renderSurface.blit(buttonFont.render(text, antialias, color, backgroundColor), (buttonX,buttonY)) # 渲染文字
 
@@ -148,9 +162,12 @@ if __name__ == "__main__":
                     else:
                         self.buttonID[buttonID][0] = self.buttonID[buttonID][1]
                 if event.type == pygame.MOUSEBUTTONUP and (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont,text))[1]): # 按下按钮
-                    functions
+                    if songIndex == -1:
+                        functions
+                    else:
+                        functions(songIndex)
             
-        def beforeChangeTo(self):
+        def beforeChangeTo(self, pre_function):
             def __change_temp():
                 # To do:减少时间 太慢了哈哈哈哈
                 Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
@@ -193,6 +210,7 @@ if __name__ == "__main__":
                 Mask2_x = 880
                 while True:
                     self.Main_Screen.fill((34,40,49))
+                    pre_function()
                     if Mask1_x >= 0:
                         sleep(0.2)
                         self.LastM1 = Mask1_x
@@ -238,29 +256,34 @@ if __name__ == "__main__":
         def Main_Screen_(self):
             self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)]) # 开始游戏按钮ID
             
-            self.beforeChangeTo()
+            self.beforeChangeTo(self.__returnSaveNone)
             sleep(2.2)
-            def _render_start_game():
-                # _render_start_game作为加载时预处理的图像
-                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame(0), self.buttonID[0][0])
-            self.afterChangeTo(_render_start_game)
+            self.afterChangeTo(self._render_start_game)
             sleep(2.2)
-            
+            # 以后填个坑
+            # 这里一直用sleep守着不是个事
+            # sleep会导致主程序未响应影响游玩
             
             while True:
                 self.Main_Screen.fill((34,40,49))
-                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame(0), self.buttonID[0][0])
+                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
                 
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.update()
         
         def getIntoGame(self, songs):
+            self.beforeChangeTo(self._render_start_game)
+            sleep(2.2)
+            self.afterChangeTo(self._render_chosing_game)
+            sleep(2.2)
             while True:
-                print("in")
-                break
+                songFrame = pygame.image.load(".\\data\\img\\frame.png")
+                for i in len(Song_List):
+                    self.Main_Screen.blit(songFrame,(100,100))
+                
+                
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.update()
-            
             
         def Keep_Flip(self):
             while True:
