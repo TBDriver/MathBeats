@@ -76,10 +76,13 @@ if __name__ == "__main__":
             self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
             self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
             self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
+        def __revergeMainGameWhile(self):
+            self.mainScreenLock = not self.mainScreenLock
+            return self.__returnSaveNone
         def __init__(self):
             self.Main_Screen = pygame.display.set_mode(size=(1054,600))
             self.Game_State = "start"
-            self.Game_FPS = 120    # FPS
+            self.Game_FPS = 60    # FPS
             self.Game_Tick = pygame.time.Clock()
             self.Antialias = True # 抗锯齿
             self.LastM1 = 0
@@ -163,7 +166,7 @@ if __name__ == "__main__":
                         self.buttonID[buttonID][0] = self.buttonID[buttonID][1]
                 if event.type == pygame.MOUSEBUTTONUP and (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont,text))[1]): # 按下按钮
                     if songIndex == -1:
-                        functions
+                        functions()
                     else:
                         functions(songIndex)
             
@@ -226,7 +229,14 @@ if __name__ == "__main__":
                     pygame.display.update() #更新屏幕内容
             _temp_thread = threading.Thread(target=__change_temp) # 多线程的原因是后台还得接着加载 不能耽误工作
             _temp_thread.start()    
-        def afterChangeTo(self,pre_function):
+        def afterChangeTo(self,preFunction,*afterFunction):
+            
+            if afterFunction:
+                pass
+            else:
+                def afterFunction():
+                    pass
+            print(afterFunction)
             def __change_temp():
                 sleep(0.2)
                 Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
@@ -237,7 +247,7 @@ if __name__ == "__main__":
                 while True:
                     
                     self.Main_Screen.fill((34,40,49))
-                    pre_function()
+                    preFunction()
                     if Mask1_x <= -810:
                         break
                     Mask1_x -= 5
@@ -248,42 +258,47 @@ if __name__ == "__main__":
                     
                     self.Game_Tick.tick(self.Game_FPS)
                     pygame.display.update() #更新屏幕内容
-                    
+                afterFunction
+                
             _temp_thread = threading.Thread(target=__change_temp)
             _temp_thread.start()
         
         # 界面
         def Main_Screen_(self):
+            self.mainScreenLock = False
             self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)]) # 开始游戏按钮ID
             
             self.beforeChangeTo(self.__returnSaveNone)
             sleep(2.2)
-            self.afterChangeTo(self._render_start_game)
+            self.afterChangeTo(self._render_start_game,self.__revergeMainGameWhile)
             sleep(2.2)
             # 以后填个坑
             # 这里一直用sleep守着不是个事
             # sleep会导致主程序未响应影响游玩
-            
+
             while True:
-                self.Main_Screen.fill((34,40,49))
-                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
-                
-                self.Game_Tick.tick(self.Game_FPS)
-                pygame.display.update()
+                while self.mainScreenLock:
+                    self.Main_Screen.fill((34,40,49))
+                    self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
+                    
+                    self.Game_Tick.tick(self.Game_FPS)
+                    pygame.display.update()
         
         def getIntoGame(self, songs):
+            self.mainGetIntoGameLock = False
             self.beforeChangeTo(self._render_start_game)
             sleep(2.2)
-            self.afterChangeTo(self._render_chosing_game)
+            self.afterChangeTo(self._render_chosing_game,self.__revergeMainGameWhile)
             sleep(2.2)
             while True:
-                songFrame = pygame.image.load(".\\data\\img\\frame.png")
-                for i in len(Song_List):
-                    self.Main_Screen.blit(songFrame,(100,100))
-                
-                
-                self.Game_Tick.tick(self.Game_FPS)
-                pygame.display.update()
+                while self.mainGetIntoGameLock:
+                    songFrame = pygame.image.load(".\\data\\img\\frame.png")
+                    for i in len(Song_List):
+                        self.Main_Screen.blit(songFrame,(100,100))
+                    
+                    
+                    self.Game_Tick.tick(self.Game_FPS)
+                    pygame.display.update()
             
         def Keep_Flip(self):
             while True:
