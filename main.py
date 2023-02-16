@@ -76,7 +76,7 @@ if __name__ == "__main__":
             self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
             self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
             self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
-        def __revergeMainGameWhile(self):
+        def __revergeMainScreenWhile(self):
             self.mainScreenLock = not self.mainScreenLock
             return self.__returnSaveNone
         def __init__(self):
@@ -108,7 +108,8 @@ if __name__ == "__main__":
         # 过渡函数
         def _render_start_game(self):
             # _render_start_game作为加载时预处理的图像
-            self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
+            while self.mainScreenLock:
+                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
         def _render_chosing_game(self):
             pass
         
@@ -267,31 +268,29 @@ if __name__ == "__main__":
         def Main_Screen_(self):
             self.mainScreenLock = False
             self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)]) # 开始游戏按钮ID
-            
             self.beforeChangeTo(self.__returnSaveNone)
-            sleep(2.2)
-            self.afterChangeTo(self._render_start_game,self.__revergeMainGameWhile)
-            sleep(2.2)
+            self.afterChangeTo(self._render_start_game,self.__revergeMainScreenWhile)
             # 以后填个坑
             # 这里一直用sleep守着不是个事
             # sleep会导致主程序未响应影响游玩
-
+            
             while True:
                 while self.mainScreenLock:
+                    print("inself")
                     self.Main_Screen.fill((34,40,49))
                     self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
                     
                     self.Game_Tick.tick(self.Game_FPS)
                     pygame.display.update()
         
+        
         def getIntoGame(self, songs):
             self.mainGetIntoGameLock = False
             self.beforeChangeTo(self._render_start_game)
-            sleep(2.2)
-            self.afterChangeTo(self._render_chosing_game,self.__revergeMainGameWhile)
-            sleep(2.2)
+            self.afterChangeTo(self._render_chosing_game,self.__revergeMainScreenWhile)
             while True:
-                while self.mainGetIntoGameLock:
+                while self.mainGetIntoGameLock and not self.mainScreenLock:
+                    print("ingame")
                     songFrame = pygame.image.load(".\\data\\img\\frame.png")
                     for i in len(Song_List):
                         self.Main_Screen.blit(songFrame,(100,100))
