@@ -76,9 +76,11 @@ if __name__ == "__main__":
             self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
             self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
             self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
-        def __revergeMainScreenWhile(self):
-            self.mainScreenLock = not self.mainScreenLock
+        '''
+        def __revergeWhileLock(self):
+            self.whileLock = not self.whileLock
             return self.__returnSaveNone
+        '''
         def __init__(self):
             self.Main_Screen = pygame.display.set_mode(size=(1054,600))
             self.Game_State = "start"
@@ -87,6 +89,7 @@ if __name__ == "__main__":
             self.Antialias = True # 抗锯齿
             self.LastM1 = 0
             self.LastM2 = 0
+            self.inLock = False
             
             self.buttonID = [] # 按钮ID初始化
             self.__fontInit()  # 文字封装初始化
@@ -171,65 +174,65 @@ if __name__ == "__main__":
                     else:
                         functions(songIndex)
             
-        def beforeChangeTo(self, pre_function):
-            def __change_temp():
-                # To do:减少时间 太慢了哈哈哈哈
-                Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
-                Masks_img_2 = pygame.image.load(".\data\img\Mask2.png")
-                '''
-                一个大坑,是类似于Arc的平滑移动
-                
-                sMask1_x = -670 # 基本值
-                sMask2_x = 1736
-                
-                Mask1_x = -670
-                Mask2_x = 1736
-                temptick = 0
-                Mask_state = "right"
-                while True:
-                    print("Mask1_x:" + str(Mask1_x))
-                    print("Mask2_x:" + str(Mask2_x))
-                    
-                    self.Main_Screen.blit(Masks_img_1,(Mask1_x,0))
-                    self.Main_Screen.blit(Masks_img_2,(Mask2_x,0))
-                    
-                    if Mask1_x >= 527:
-                        Mask_state = "left"
-                        temptick = 0         
-                    if Mask_state == "right":
-                        Mask1_x = Mask1_x + 670 * int(self.Mask_Smooth[temptick])
-                        Mask2_x = sMask2_x * (1 - self.Mask_Smooth[temptick])
-                        temptick += 1  
-                    if Mask_state == "left":
-                        print(self.Mask_Smooth)
-                        Mask1_x = Mask1_x - 670 * self.Mask_Smooth[temptick]
-                        Mask2_x = sMask2_x * (1 - self.Mask_Smooth[temptick])
-                        temptick += 1
-                        
-                    self.Game_Tick.tick(self.Game_FPS)
-                    pygame.display.flip() #更新屏幕内容
+        def beforeChangeTo(self, pre_function, *afterFunction):
+            # To do:减少时间 太慢了哈哈哈哈
+            Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
+            Masks_img_2 = pygame.image.load(".\data\img\Mask2.png")
             '''
+            一个大坑,是类似于Arc的平滑移动
+            
+            sMask1_x = -670 # 基本值
+            sMask2_x = 1736
+            
+            Mask1_x = -670
+            Mask2_x = 1736
+            temptick = 0
+            Mask_state = "right"
+            while True:
+                print("Mask1_x:" + str(Mask1_x))
+                print("Mask2_x:" + str(Mask2_x))
                 
-                Mask1_x = -810
-                Mask2_x = 880
-                while True:
-                    self.Main_Screen.fill((34,40,49))
-                    pre_function()
-                    if Mask1_x >= 0:
-                        sleep(0.2)
-                        self.LastM1 = Mask1_x
-                        self.LastM2 = Mask2_x
-                        break
-                    Mask1_x += 5
-                    Mask2_x -= 5
-
+                self.Main_Screen.blit(Masks_img_1,(Mask1_x,0))
+                self.Main_Screen.blit(Masks_img_2,(Mask2_x,0))
+                
+                if Mask1_x >= 527:
+                    Mask_state = "left"
+                    temptick = 0         
+                if Mask_state == "right":
+                    Mask1_x = Mask1_x + 670 * int(self.Mask_Smooth[temptick])
+                    Mask2_x = sMask2_x * (1 - self.Mask_Smooth[temptick])
+                    temptick += 1  
+                if Mask_state == "left":
+                    print(self.Mask_Smooth)
+                    Mask1_x = Mask1_x - 670 * self.Mask_Smooth[temptick]
+                    Mask2_x = sMask2_x * (1 - self.Mask_Smooth[temptick])
+                    temptick += 1
                     
-                    self.Main_Screen.blit(Masks_img_1,(Mask1_x,0))
-                    self.Main_Screen.blit(Masks_img_2,(Mask2_x,0))
-                    self.Game_Tick.tick(self.Game_FPS)
-                    pygame.display.update() #更新屏幕内容
-            _temp_thread = threading.Thread(target=__change_temp) # 多线程的原因是后台还得接着加载 不能耽误工作
-            _temp_thread.start()    
+                self.Game_Tick.tick(self.Game_FPS)
+                pygame.display.flip() #更新屏幕内容
+        '''
+            
+            Mask1_x = -810
+            Mask2_x = 880
+            while self.inLock:
+                self.Main_Screen.fill((34,40,49))
+                pre_function()
+                if Mask1_x >= 0:
+                    sleep(0.2)
+                    self.LastM1 = Mask1_x
+                    self.LastM2 = Mask2_x
+                    self.inLock = False
+                    break
+                Mask1_x += 5
+                Mask2_x -= 5
+
+                
+                self.Main_Screen.blit(Masks_img_1,(Mask1_x,0))
+                self.Main_Screen.blit(Masks_img_2,(Mask2_x,0))
+                self.Game_Tick.tick(self.Game_FPS)
+                pygame.display.update() #更新屏幕内容
+                    
+            afterFunction
         def afterChangeTo(self,preFunction,*afterFunction):
             
             if afterFunction:
@@ -237,38 +240,33 @@ if __name__ == "__main__":
             else:
                 def afterFunction():
                     pass
-            def __change_temp():
-                sleep(0.2)
-                Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
-                Masks_img_2 = pygame.image.load(".\data\img\Mask2.png")
-                Mask1_x = self.LastM1
-                Mask2_x = self.LastM2
+            sleep(0.2)
+            Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
+            Masks_img_2 = pygame.image.load(".\data\img\Mask2.png")
+            Mask1_x = self.LastM1
+            Mask2_x = self.LastM2
+            while self.inLock:
+                self.Main_Screen.fill((34,40,49))
+                preFunction()
+                if Mask1_x <= -810:
+                    self.inLock = False
+                    break
+                Mask1_x -= 5
+                Mask2_x += 5
                 
-                while True:
-                    
-                    self.Main_Screen.fill((34,40,49))
-                    preFunction()
-                    if Mask1_x <= -810:
-                        break
-                    Mask1_x -= 5
-                    Mask2_x += 5
-                    
-                    self.Main_Screen.blit(Masks_img_1,(Mask1_x,0))
-                    self.Main_Screen.blit(Masks_img_2,(Mask2_x,0))
-                    
-                    self.Game_Tick.tick(self.Game_FPS)
-                    pygame.display.update() #更新屏幕内容
-                afterFunction
+                self.Main_Screen.blit(Masks_img_1,(Mask1_x,0))
+                self.Main_Screen.blit(Masks_img_2,(Mask2_x,0))
                 
-            _temp_thread = threading.Thread(target=__change_temp)
-            _temp_thread.start()
+                self.Game_Tick.tick(self.Game_FPS)
+                pygame.display.update() #更新屏幕内容
+            afterFunction
         
         # 界面
         def Main_Screen_(self):
             self.mainScreenLock = False
             self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)]) # 开始游戏按钮ID
             self.beforeChangeTo(self.__returnSaveNone)
-            self.afterChangeTo(self._render_start_game,self.__revergeMainScreenWhile)
+            self.afterChangeTo(self._render_start_game)
             # 以后填个坑
             # 这里一直用sleep守着不是个事
             # sleep会导致主程序未响应影响游玩
@@ -277,7 +275,7 @@ if __name__ == "__main__":
                 while self.mainScreenLock:
                     print("inself")
                     self.Main_Screen.fill((34,40,49))
-                    self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
+                    self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame   , self.buttonID[0][0], 0)
                     
                     self.Game_Tick.tick(self.Game_FPS)
                     pygame.display.update()
@@ -286,7 +284,7 @@ if __name__ == "__main__":
         def getIntoGame(self, songs):
             self.mainGetIntoGameLock = False
             self.beforeChangeTo(self._render_start_game)
-            self.afterChangeTo(self._render_chosing_game,self.__revergeMainScreenWhile)
+            self.afterChangeTo(self._render_chosing_game)
             while True:
                 while self.mainGetIntoGameLock and not self.mainScreenLock:
                     print("ingame")
