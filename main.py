@@ -292,7 +292,6 @@ if __name__ == "__main__":
                     for i in len(Song_List):
                         self.Main_Screen.blit(songFrame,(100,100))
                     
-                    
                     self.Game_Tick.tick(self.Game_FPS)
                     pygame.display.update()
             
