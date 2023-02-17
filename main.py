@@ -237,7 +237,6 @@ if __name__ == "__main__":
             else:
                 def afterFunction():
                     pass
-            print(afterFunction)
             def __change_temp():
                 sleep(0.2)
                 Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
