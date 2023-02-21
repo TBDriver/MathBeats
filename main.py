@@ -307,11 +307,19 @@ class MathBeats():
                 else:   
                     self.Main_Screen.blit((pygame.font.Font(self.z准雅宋,35)).render(Song_List[i][0], self.Antialias, (202, 207, 210)), (110 * (i+1) + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[0], 140)) # 渲染文字
                 # 游玩按钮
-                self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
+                self.showAButton("开始游戏", 25, self.z准雅宋, (202, 207, 210), 
+                                120 * (i+1) + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[0], (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[1] + 220
+                                , self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
+                
                 
             self.Game_Tick.tick(self.Game_FPS)
             pygame.display.update()
+
     def getIntoGame(self):
+        '''
+        你先别急
+        如函数名
+        '''
         pass
     
     def Keep_Flip(self):
