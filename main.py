@@ -82,6 +82,7 @@ class MathBeats():
         return self.__returnSaveNone
     def __eventBusyOrNot(self,event):
         '''
+        检测时间栈是否繁忙 返回0或1
         event为所排除的查询事件
         '''
         for i in self.eventStack:
@@ -184,7 +185,6 @@ class MathBeats():
                     functions(songIndex)
         
     def beforeChangeTo(self, preFunction, *afterFunction):
-        # To do:减少时间 太慢了哈哈哈哈
         Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
         Masks_img_2 = pygame.image.load(".\data\img\Mask2.png")
         '''
@@ -225,7 +225,7 @@ class MathBeats():
         Mask2_x = 880
         inWhile = True
         while inWhile: # 不断尝试进行加载
-            while (self.eventStack[0] and self.__eventBusyOrNot):
+            while (self.eventStack[0] and self.__eventBusyOrNot): 
                 self.Main_Screen.fill((34,40,49))
                 preFunction()
                 if Mask1_x >= 0:
@@ -233,6 +233,7 @@ class MathBeats():
                     self.LastM1 = Mask1_x
                     self.LastM2 = Mask2_x
                     inWhile = False
+                    self.eventStack[0] = 0
                     break
                 Mask1_x += 5
                 Mask2_x -= 5
@@ -259,6 +260,7 @@ class MathBeats():
                 preFunction()
                 if Mask1_x <= -810:
                     inWhile = False
+                    self.eventStack[1] = 0
                     break
                 Mask1_x -= 5
                 Mask2_x += 5
@@ -277,7 +279,7 @@ class MathBeats():
         self.eventStack[0] = 1
         self.beforeChangeTo(self.__returnSaveNone)
         self.eventStack[1] = 1
-        self.afterChangeTo(self._render_start_game,self.__revergeWhileLock)
+        self.afterChangeTo(self._render_start_game)
         # 以后填个坑
         # 这里一直用sleep守着不是个事
         # sleep会导致主程序未响应影响游玩
@@ -291,7 +293,7 @@ class MathBeats():
     def selectSong(self, songs): 
         self.mainGetIntoGameLock = False
         self.beforeChangeTo(self._render_start_game)
-        self.afterChangeTo(self._render_chosing_game,self.__revergeWhileLock)
+        self.afterChangeTo(self._render_chosing_game)
         
         while True:
             self.Main_Screen.fill((34,40,49))
