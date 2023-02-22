@@ -250,7 +250,6 @@ class MathBeats():
                 self.Main_Screen.blit(Masks_img_2, (Mask2_x, 0))
                 self.Game_Tick.tick(self.Game_FPS)
                 pygame.display.update()  # 更新屏幕内容
-
     def afterChangeTo(self, preFunction, *afterFunctions):
         if afterFunctions:
             pass
@@ -324,10 +323,17 @@ class MathBeats():
                     self.Main_Screen.blit((pygame.font.Font(self.z准雅宋, 35)).render(Song_List[i][0], self.Antialias, (202, 207, 210)), (
                         110 * (i+1) + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[0], 140))  # 渲染文字
                 # 游玩按钮
-                self.showAButton("开始游戏", 35, self.z准雅宋, (202, 207, 210),
-                                 (200 * i + (pygame.font.Font.size(pygame.font.Font(
-                                     self.z准雅宋, 35), Song_List[i][0]))[0] + 50),
-                                 460, self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0])
+                self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 开始游戏按钮ID
+                if i == 0 :
+                    self.showAButton("Start→", 35, self.z准雅宋, (202, 207, 210),
+                                    170 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
+                                    , 430
+                                    , self.Main_Screen, self.Antialias, i+1, self.getIntoGame, self.buttonID[i+1][0])
+                else:
+                    self.showAButton("Start→", 35, self.z准雅宋, (202, 207, 210),
+                                    320 * (i+1) - 150 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
+                                    , 430
+                                    , self.Main_Screen, self.Antialias, i+1, self.getIntoGame, self.buttonID[i+1][0])
 
             self.Game_Tick.tick(self.Game_FPS)
             pygame.display.update()
