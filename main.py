@@ -80,7 +80,7 @@ class MathBeats():
     def __revergeWhileLock(self):
         self.whileLock = not self.whileLock
         return self.__returnSaveNone
-    def __eventBusyOrNot(self,event):
+    def __eventBusyOrNot(self,event: int):
         '''
         检测时间栈是否繁忙 返回0或1
         event为所排除的查询事件
@@ -151,7 +151,7 @@ class MathBeats():
     def showAButton(self, text: int, size: str, font: str, 
                     color: tuple, buttonX: int, buttonY: int, renderSurface: pygame.Surface, 
                     antialias: bool, buttonID: int, functions, 
-                    backgroundColor: tuple = (255,255,255) ,*songIndex: int):
+                    backgroundColor: tuple = (255,255,255) ,songIndex: int = -1):
         '''
         text: 按钮文本         字符串
         size: 文本大小         整型
@@ -164,10 +164,6 @@ class MathBeats():
         renderSurface: 作用Surface对象
         songIndex: 歌曲索引
         '''
-        if songIndex:
-            pass
-        else:
-            songIndex = -1
         buttonFont = pygame.font.Font(font,size) # 加载字符
         renderSurface.blit(buttonFont.render(text, antialias, color, backgroundColor), (buttonX,buttonY)) # 渲染文字
 
@@ -179,10 +175,7 @@ class MathBeats():
                 else:
                     self.buttonID[buttonID][0] = self.buttonID[buttonID][1]
             if event.type == pygame.MOUSEBUTTONUP and (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont,text))[1]): # 按下按钮
-                if songIndex == -1:
-                    functions()
-                else:
-                    functions(songIndex)
+                functions()
         
     def beforeChangeTo(self, preFunction, *afterFunction):
         Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
@@ -225,7 +218,7 @@ class MathBeats():
         Mask2_x = 880
         inWhile = True
         while inWhile: # 不断尝试进行加载
-            while (self.eventStack[0] and self.__eventBusyOrNot): 
+            while (self.eventStack[0] and not(self.__eventBusyOrNot(self.eventStack[0]))): 
                 self.Main_Screen.fill((34,40,49))
                 preFunction()
                 if Mask1_x >= 0:
@@ -237,7 +230,6 @@ class MathBeats():
                     break
                 Mask1_x += 5
                 Mask2_x -= 5
-
                 self.Main_Screen.blit(Masks_img_1,(Mask1_x,0))
                 self.Main_Screen.blit(Masks_img_2,(Mask2_x,0))
                 self.Game_Tick.tick(self.Game_FPS)
@@ -255,7 +247,7 @@ class MathBeats():
         Mask2_x = self.LastM2
         inWhile = True
         while inWhile:
-            while self.eventStack[1] and self.__eventBusyOrNot:
+            while self.eventStack[1] and not(self.__eventBusyOrNot(self.eventStack[1])):
                 self.Main_Screen.fill((34,40,49))
                 preFunction()
                 if Mask1_x <= -810:
@@ -286,13 +278,16 @@ class MathBeats():
         
         while True:
             self.Main_Screen.fill((34,40,49))
-            self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0], 0)
+            self.showAButton("开始游戏", 50, self.z准雅宋, (255,255,255), 300, 300, self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0])
             
             self.Game_Tick.tick(self.Game_FPS)
             pygame.display.update()
-    def selectSong(self, songs): 
+        
+    def selectSong(self): 
         self.mainGetIntoGameLock = False
+        self.eventStack[0] = 1
         self.beforeChangeTo(self._render_start_game)
+        self.eventStack[1] = 1
         self.afterChangeTo(self._render_chosing_game)
         
         while True:
@@ -307,9 +302,10 @@ class MathBeats():
                 else:   
                     self.Main_Screen.blit((pygame.font.Font(self.z准雅宋,35)).render(Song_List[i][0], self.Antialias, (202, 207, 210)), (110 * (i+1) + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[0], 140)) # 渲染文字
                 # 游玩按钮
-                self.showAButton("开始游戏", 25, self.z准雅宋, (202, 207, 210), 
-                                120 * (i+1) + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[0], (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[1] + 220
-                                , self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
+                self.showAButton("开始游戏", 35, self.z准雅宋, (202, 207, 210), 
+                                    (200 * i + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i][0]))[0] + 50),
+                                    460
+                                , self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0])
                 
                 
             self.Game_Tick.tick(self.Game_FPS)
