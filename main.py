@@ -7,7 +7,7 @@ import random
 import json  # ,bezier
 from sys import exit
 import threading
-import widgets
+import widgets, scoreEditor
 pygame.init()
 
 
@@ -359,16 +359,14 @@ class MathBeats():
         pass
     
     def createScore(self):
-        
         # def temp():
         # 加载制谱器
-        print("in")
-        def temp():
-            import scoreEditor
-            ScoreEditor = scoreEditor.MathBeatsScoreEditor()
-            ScoreEditor.start()
-        t = threading.Thread(target=temp)
-        t.start()
+        #def temp():
+        print("intemp")
+        ScoreEditor = scoreEditor.MathBeatsScoreEditor(self.Main_Screen)
+        ScoreEditor.start()
+        #t = threading.Thread(target=temp)
+        #t.start()
         
         
     

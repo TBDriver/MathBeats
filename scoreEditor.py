@@ -11,9 +11,9 @@ class MathBeatsScoreEditor:
         self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
         self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
         
-    def __init__(self):
+    def __init__(self, Surface):
         '''制谱器初始化'''
-        self.MathBeatsScoreEditor = pygame.display.set_mode(size=(1054, 600))
+        self.MathBeatsScoreEditor = Surface
         self.gameFPS = 200
         self.Antialias = True
         self.eventStack = [0, 0, 0]
