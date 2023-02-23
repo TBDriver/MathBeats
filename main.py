@@ -7,7 +7,7 @@ import random
 import json  # ,bezier
 from sys import exit
 import threading
-import widgets, scoreEditor
+import widgets
 pygame.init()
 
 
@@ -194,8 +194,8 @@ class MathBeats():
                 functions()
 
     def beforeChangeTo(self, preFunction, *afterFunction):
-        Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
-        Masks_img_2 = pygame.image.load(".\data\img\Mask2.png")
+        Masks_img_1 = pygame.image.load(".\data\img\Mask1.png").convert_alpha()
+        Masks_img_2 = pygame.image.load(".\data\img\Mask2.png").convert_alpha()
         '''
         一个大坑,是类似于Arc的平滑移动
         
@@ -244,8 +244,8 @@ class MathBeats():
                     inWhile = False
                     self.eventStack[0] = 0
                     break
-                Mask1_x += 10
-                Mask2_x -= 10
+                Mask1_x += 5
+                Mask2_x -= 5
                 
                 self.Main_Screen.blit(Masks_img_1, (Mask1_x, 0))
                 self.Main_Screen.blit(Masks_img_2, (Mask2_x, 0))
@@ -258,8 +258,8 @@ class MathBeats():
             def afterFunctions():
                 pass
         sleep(0.2)
-        Masks_img_1 = pygame.image.load(".\data\img\Mask1.png")
-        Masks_img_2 = pygame.image.load(".\data\img\Mask2.png")
+        Masks_img_1 = pygame.image.load(".\data\img\Mask1.png").convert_alpha()
+        Masks_img_2 = pygame.image.load(".\data\img\Mask2.png").convert_alpha()
         Mask1_x = self.LastM1
         Mask2_x = self.LastM2
         inWhile = True
@@ -271,8 +271,8 @@ class MathBeats():
                     inWhile = False
                     self.eventStack[1] = 0
                     break
-                Mask1_x -= 10
-                Mask2_x += 10
+                Mask1_x -= 5
+                Mask2_x += 5
 
                 self.Main_Screen.blit(Masks_img_1, (Mask1_x, 0))
                 self.Main_Screen.blit(Masks_img_2, (Mask2_x, 0))
@@ -292,6 +292,13 @@ class MathBeats():
         self.afterChangeTo(self._render_start_game)
 
         while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # 卸载所有模块
+                    pygame.quit()
+                    # 终止程序，确保退出程序
+                    exit()
+                    
             self.Main_Screen.fill((34, 40, 49))
             self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 450, 200,
                              self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0])
@@ -335,6 +342,12 @@ class MathBeats():
                                     , 430
                                     , self.Main_Screen, self.Antialias, i+2, self.getIntoGame, self.buttonID[i+2][0])
 
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # 卸载所有模块
+                    pygame.quit()
+                    # 终止程序，确保退出程序
+                    exit()
             sleep(1/self.Game_FPS)
             pygame.display.update()
 
@@ -349,10 +362,14 @@ class MathBeats():
         
         # def temp():
         # 加载制谱器
-        ScoreEditor = scoreEditor.MathBeatsScoreEditor()
-        ScoreEditor.start()
-        # t = threading.Thread(target=temp)
-        # t.start()
+        print("in")
+        def temp():
+            import scoreEditor
+            ScoreEditor = scoreEditor.MathBeatsScoreEditor()
+            ScoreEditor.start()
+        t = threading.Thread(target=temp)
+        t.start()
+        
         
     
     def Keep_Flip(self):

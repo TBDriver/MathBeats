@@ -81,3 +81,6 @@ class MathBeatsScoreEditor:
             
     def start(self):
         self.loadingScreen()
+
+# ScoreEditor = MathBeatsScoreEditor()
+# ScoreEditor.start()
