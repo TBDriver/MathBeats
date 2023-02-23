@@ -7,9 +7,8 @@ import random
 import json  # ,bezier
 from sys import exit
 import threading
-import widgets
+import widgets, scoreEditor
 pygame.init()
-Widgets = widgets.MathBeatsWidgets()
 
 
 # 加载文件
@@ -75,23 +74,17 @@ Note信息 对应:
 class MathBeats():
     # 预处理
     def __returnSaveNone(self):
-        '''
-        返回6的函数,无实际意义
-        '''
+        '''返回空函数的函数,无实际意义'''
         def ___None():
             pass
         return ___None
 
     def __fontInit(self):
-        # 字体简称
+        '''字体路径初始化'''
         self.z准雅宋 = ".\\data\\ttf\\方正准雅宋简体.ttf"
         self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
         self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
         self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
-
-    def __revergeWhileLock(self):
-        self.whileLock = not self.whileLock
-        return self.__returnSaveNone
 
     def __eventBusyOrNot(self, event: int):
         '''
@@ -106,7 +99,7 @@ class MathBeats():
     def __init__(self):
         self.Main_Screen = pygame.display.set_mode(size=(1054, 600))
         self.Game_State = "start"
-        self.Game_FPS = 60    # FPS
+        self.Game_FPS = 200    # FPS
         self.Game_Tick = pygame.time.Clock()
         self.Antialias = True  # 抗锯齿
         self.LastM1 = 0
@@ -117,6 +110,11 @@ class MathBeats():
         self.__fontInit()  # 文字封装初始化
         pygame.font.init()  # 文字库初始化
         pygame.display.set_caption("Mathbeats")
+        
+        # 加载小组件
+        self.Widgets = widgets.MathBeatsWidgets()
+        
+        
         # self.Update_Smooth()
     '''
     摆了 会用公式不知道怎么应用
@@ -133,8 +131,10 @@ class MathBeats():
     # 过渡函数
     def _render_start_game(self):
         # _render_start_game作为加载时预处理的图像
-        self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 300, 300,
-                         self.Main_Screen, self.Antialias, 0, self.getIntoGame, self.buttonID[0][0], 0)
+        self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 450, 200,
+                             self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0])
+        self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 450, 500,
+                             self.Main_Screen, self.Antialias, 1, self.createScore, self.buttonID[1][0])
 
     def _render_chosing_game(self):
         pass
@@ -159,7 +159,7 @@ class MathBeats():
                     keep_screen = False
                     break  # 退出循环因为标题画面已关
 
-            self.Game_Tick.tick(self.Game_FPS)
+            sleep(1/self.Game_FPS)
             pygame.display.flip()  # 更新屏幕内容
 
     # 功能性函数
@@ -226,7 +226,7 @@ class MathBeats():
                 Mask2_x = sMask2_x * (1 - self.Mask_Smooth[temptick])
                 temptick += 1
                 
-            self.Game_Tick.tick(self.Game_FPS)
+            sleep(1/self.Game_FPS)
             pygame.display.flip() #更新屏幕内容
     '''
 
@@ -244,12 +244,13 @@ class MathBeats():
                     inWhile = False
                     self.eventStack[0] = 0
                     break
-                Mask1_x += 5
-                Mask2_x -= 5
+                Mask1_x += 10
+                Mask2_x -= 10
+                
                 self.Main_Screen.blit(Masks_img_1, (Mask1_x, 0))
                 self.Main_Screen.blit(Masks_img_2, (Mask2_x, 0))
-                self.Game_Tick.tick(self.Game_FPS)
-                pygame.display.update()  # 更新屏幕内容
+                sleep(1/self.Game_FPS) # 限制FPS 每秒刷新self.Game_FPS次 也就是每刷新一次等待1/self.Game_FPS秒
+                pygame.display.flip()  # 更新屏幕内容
     def afterChangeTo(self, preFunction, *afterFunctions):
         if afterFunctions:
             pass
@@ -270,37 +271,36 @@ class MathBeats():
                     inWhile = False
                     self.eventStack[1] = 0
                     break
-                Mask1_x -= 5
-                Mask2_x += 5
+                Mask1_x -= 10
+                Mask2_x += 10
 
                 self.Main_Screen.blit(Masks_img_1, (Mask1_x, 0))
                 self.Main_Screen.blit(Masks_img_2, (Mask2_x, 0))
 
-                self.Game_Tick.tick(self.Game_FPS)
-                pygame.display.update()  # 更新屏幕内容
+                sleep(1/self.Game_FPS)
+                pygame.display.flip()  # 更新屏幕内容
         afterFunctions
 
     # 界面
     def Main_Screen_(self):
         self.mainScreenLock = False
-        self.buttonID.append(
-            [(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 开始游戏按钮ID
+        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 开始游戏按钮ID
+        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])
         self.eventStack[0] = 1
         self.beforeChangeTo(self.__returnSaveNone)
         self.eventStack[1] = 1
         self.afterChangeTo(self._render_start_game)
-        # 以后填个坑
-        # 这里一直用sleep守着不是个事
-        # sleep会导致主程序未响应影响游玩
 
         while True:
             self.Main_Screen.fill((34, 40, 49))
-            self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 300, 300,
+            self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 450, 200,
                              self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0])
-
-            self.Game_Tick.tick(self.Game_FPS)
+            self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 450, 500,
+                             self.Main_Screen, self.Antialias, 1, self.createScore, self.buttonID[1][0])
+            
+            sleep(1/self.Game_FPS)
             pygame.display.update()
-
+    
     def selectSong(self):
         self.mainGetIntoGameLock = False
         self.eventStack[0] = 1
@@ -326,16 +326,16 @@ class MathBeats():
                 self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 开始游戏按钮ID
                 if i == 0 :
                     self.showAButton("Start→", 35, self.z准雅宋, (202, 207, 210),
-                                    170 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
+                                    150 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
                                     , 430
-                                    , self.Main_Screen, self.Antialias, i+1, self.getIntoGame, self.buttonID[i+1][0])
+                                    , self.Main_Screen, self.Antialias, i+2, self.getIntoGame, self.buttonID[i+2][0])
                 else:
                     self.showAButton("Start→", 35, self.z准雅宋, (202, 207, 210),
-                                    320 * (i+1) - 150 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
+                                    320 * (i+1) - 170 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
                                     , 430
-                                    , self.Main_Screen, self.Antialias, i+1, self.getIntoGame, self.buttonID[i+1][0])
+                                    , self.Main_Screen, self.Antialias, i+2, self.getIntoGame, self.buttonID[i+2][0])
 
-            self.Game_Tick.tick(self.Game_FPS)
+            sleep(1/self.Game_FPS)
             pygame.display.update()
 
     def getIntoGame(self):
@@ -344,7 +344,17 @@ class MathBeats():
         如函数名
         '''
         pass
-
+    
+    def createScore(self):
+        
+        # def temp():
+        # 加载制谱器
+        ScoreEditor = scoreEditor.MathBeatsScoreEditor()
+        ScoreEditor.start()
+        # t = threading.Thread(target=temp)
+        # t.start()
+        
+    
     def Keep_Flip(self):
         while True:
             # 游戏状态为 开始游戏
@@ -359,7 +369,7 @@ class MathBeats():
                     # 终止程序，确保退出程序
                     exit()
 
-            self.Game_Tick.tick(self.Game_FPS)
+            sleep(1/self.Game_FPS)
             pygame.display.flip()  # 更新屏幕内容
 
     def start(self):
