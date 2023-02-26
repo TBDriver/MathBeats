@@ -1,19 +1,13 @@
 # -*- coding:utf-8 -*-
 
 from time import sleep, gmtime
-import os
-import pygame
-import random
-import json  # ,bezier
 from sys import exit
-import threading
-import widgets, scoreEditor
+from mutagen.mp3 import MP3
+import os, pygame, threading, json  # ,bezier
+import widgets, button
+
 pygame.init()
-
-
-# 加载文件
-# 加载存档与设置
-# 存档文件夹
+# 加载文件,存档与设置
 try:
     os.mkdir(".\config")
 except:
@@ -78,14 +72,12 @@ class MathBeats():
         def ___None():
             pass
         return ___None
-
     def __fontInit(self):
         '''字体路径初始化'''
         self.z准雅宋 = ".\\data\\ttf\\方正准雅宋简体.ttf"
         self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
         self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
         self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
-
     def __eventBusyOrNot(self, event: int):
         '''
         检测时间栈是否繁忙 返回0或1
@@ -95,47 +87,61 @@ class MathBeats():
             if i and i != event:
                 return 1
         return 0
-
+    def __loadingButtonID(self):
+        self.buttonID = []     # 按钮ID初始化
+        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 开始游戏按钮ID
+        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 铺面制作按钮ID
+        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 选择歌曲返回按钮ID
+        # buttonID三个元素
+        for i in range(len(Song_List)): # 歌曲buttonID
+            self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 歌曲开始按钮ID
+        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 铺面制作ID
+        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 继续制作ID
+    def __loadingPictures(self):
+        self.songFrame = pygame.transform.scale(pygame.image.load(".\\data\\img\\frame.png").convert_alpha(), (400, 400))
+        self.Title_img = pygame.transform.scale(pygame.image.load(".\data\img\Title.png").convert_alpha(), (400, 400))
+        self.Masks_img_1 = pygame.image.load(".\data\img\Mask1.png").convert_alpha()
+        self.Masks_img_2 = pygame.image.load(".\data\img\Mask2.png").convert_alpha()
     def __init__(self):
-        self.Main_Screen = pygame.display.set_mode(size=(1054, 600))
-        self.Game_State = "start"
-        self.Game_FPS = 200    # FPS
-        self.Game_Tick = pygame.time.Clock()
+        self.Main_Screen = pygame.display.set_mode(size=(1054, 600), flags=pygame.DOUBLEBUF, )
+        self.gameState = "start"
+        self.gameFPS = 180    # FPS
+        self.gameTick = pygame.time.Clock()
         self.Antialias = True  # 抗锯齿
         self.LastM1 = 0
         self.LastM2 = 0
         self.eventStack = [0, 0, 0]  # 加载等待ID
 
-        self.buttonID = []  # 按钮ID初始化
-        self.__fontInit()  # 文字封装初始化
-        pygame.font.init()  # 文字库初始化
+        self.__fontInit()        # 文字封装初始化
+        self.__loadingButtonID() # 按钮唯一ID初始化
+        self.__loadingPictures() # 图片初始化
+        pygame.font.init()       # 文字库初始化
+        pygame.event.set_blocked(pygame.ACTIVEEVENT)
+        pygame.event.set_blocked(pygame.WINDOWENTER)
+        pygame.event.set_blocked(pygame.WINDOWLEAVE)
         pygame.display.set_caption("Mathbeats")
         
         # 加载小组件
         self.Widgets = widgets.MathBeatsWidgets()
+        '''
+        摆了 会用公式不知道怎么应用
         
-        
-        # self.Update_Smooth()
-    '''
-    摆了 会用公式不知道怎么应用
-    
-    def Update_Smooth(self):
-        # 模拟三次贝塞尔函数 用于进行平滑展示
-        # 相当于css的ease
-        # 遮罩层平滑   0.42, 0, 0.58, 1       较慢 ease-in-out
-        # 自创滑块平滑 0.6, 0.65, 0.35, 0.94 较快
-        self.Mask_Smooth   = bezier.Calculator_bezier(0.42, 0,    0.58, 1,    self.Game_FPS)
-        self.Slider_Smooth = bezier.Calculator_bezier(0.6,  0.65, 0.35, 0.94, self.Game_FPS)
-    '''
+        def Update_Smooth(self):
+            # 模拟三次贝塞尔函数 用于进行平滑展示
+            # 相当于css的ease
+            # 遮罩层平滑   0.42, 0, 0.58, 1       较慢 ease-in-out
+            # 自创滑块平滑 0.6, 0.65, 0.35, 0.94 较快
+            self.Mask_Smooth   = bezier.Calculator_bezier(0.42, 0,    0.58, 1,    self.gameFPS)
+            self.Slider_Smooth = bezier.Calculator_bezier(0.6,  0.65, 0.35, 0.94, self.gameFPS)
+        '''
 
     # 过渡函数
     def _render_start_game(self):
         # _render_start_game作为加载时预处理的图像
         self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 450, 200,
-                             self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0])
+                             self.Main_Screen, self.Antialias, 0, self.__returnSaveNone, self.buttonID[0][0])
         self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 450, 500,
-                             self.Main_Screen, self.Antialias, 1, self.createScore, self.buttonID[1][0])
-
+                             self.Main_Screen, self.Antialias, 1, self.__returnSaveNone, self.buttonID[1][0])
     def _render_chosing_game(self):
         pass
 
@@ -145,9 +151,7 @@ class MathBeats():
         while keep_screen:
             self.Main_Screen.fill((34, 40, 49))
             # Load title image
-            Title_img = pygame.transform.scale(
-                pygame.image.load(".\data\img\Title.png"), (400, 400))
-            self.Main_Screen.blit(Title_img, (307, 50))
+            self.Main_Screen.blit(self.Title_img, (307, 50))
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     # 卸载所有模块
@@ -155,19 +159,20 @@ class MathBeats():
                     # 终止程序，确保退出程序
                     exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.Game_State = "play"  # 目前直接衔接到游玩系统
+                    self.gameState = "play"  # 目前直接衔接到游玩系统
                     keep_screen = False
                     break  # 退出循环因为标题画面已关
 
-            sleep(1/self.Game_FPS)
+            sleep(1/self.gameFPS)
             pygame.display.flip()  # 更新屏幕内容
 
     # 功能性函数
     def showAButton(self, text: int, size: str, font: str,
                     color: tuple, buttonX: int, buttonY: int, renderSurface: pygame.Surface,
                     antialias: bool, buttonID: int, functions,
-                    backgroundColor: tuple = (255, 255, 255), songIndex: int = -1):
+                    backgroundColor: tuple = (255, 255, 255)):
         '''
+        用于显示按钮
         text: 按钮文本         字符串
         size: 文本大小         整型
         font: 使用字体路径     字符串
@@ -177,25 +182,28 @@ class MathBeats():
         buttonID: 按钮唯一ID   整型
         functions: 执行函数    函数    可选
         renderSurface: 作用Surface对象
-        songIndex: 歌曲索引
         '''
         buttonFont = pygame.font.Font(font, size)  # 加载字符
-        renderSurface.blit(buttonFont.render(
-            text, antialias, color, backgroundColor), (buttonX, buttonY))  # 渲染文字
-
+        renderSurface.blit(buttonFont.render(text, antialias, color, backgroundColor), (buttonX, buttonY))  # 渲染文字
+        textSize = pygame.font.Font.size(buttonFont, text)
+        
         for event in pygame.event.get():
-            if (event.type == pygame.MOUSEMOTION or event.type == pygame.MOUSEBUTTONDOWN):
-                inTheButton = (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont, text))[1])
-                if inTheButton:  # 悬停事件
-                    self.buttonID[buttonID][0] = self.buttonID[buttonID][2]
-                else:
-                    self.buttonID[buttonID][0] = self.buttonID[buttonID][1]
-            if event.type == pygame.MOUSEBUTTONUP and (event.pos[0] >= buttonX and event.pos[0] <= buttonX + (pygame.font.Font.size(buttonFont, text))[0]) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + (pygame.font.Font.size(buttonFont, text))[1]):  # 按下按钮
+            '''
+            if event.type == pygame.MOUSEMOTION and (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP) and ((event.pos[0] >= buttonX) and (event.pos[0] <= buttonX + textSize[0])) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + textSize[1]):  # 按下按钮
                 functions()
-
+            '''
+            if (event.type == 1025 or event.type == 1026 or pygame.mouse.get_pressed()[0]) and ((event.pos[0] >= buttonX) and (event.pos[0] <= buttonX + textSize[0])) and (event.pos[1] >= buttonY and event.pos[1] <= buttonY + textSize[1]):
+                functions()
+            if event.type == 1024:
+                inTheButton = ((event.pos[0] >= buttonX) and (event.pos[0] <= buttonX + textSize[0])) and ((event.pos[1] >= buttonY) and (event.pos[1] <= buttonY + textSize[1]))
+                if inTheButton: self.buttonID[buttonID][0] = self.buttonID[buttonID][2]   # 悬停事件
+                else:           self.buttonID[buttonID][0] = self.buttonID[buttonID][1]        
     def beforeChangeTo(self, preFunction, *afterFunction):
-        Masks_img_1 = pygame.image.load(".\data\img\Mask1.png").convert_alpha()
-        Masks_img_2 = pygame.image.load(".\data\img\Mask2.png").convert_alpha()
+        if afterFunction:
+            pass
+        else:
+            def afterFunction():
+                pass
         '''
         一个大坑,是类似于Arc的平滑移动
         
@@ -210,8 +218,8 @@ class MathBeats():
             print("Mask1_x:" + str(Mask1_x))
             print("Mask2_x:" + str(Mask2_x))
             
-            self.Main_Screen.blit(Masks_img_1,(Mask1_x,0))
-            self.Main_Screen.blit(Masks_img_2,(Mask2_x,0))
+            self.Main_Screen.blit(self.Masks_img_1,(Mask1_x,0))
+            self.Main_Screen.blit(self.Masks_img_2,(Mask2_x,0))
             
             if Mask1_x >= 527:
                 Mask_state = "left"
@@ -226,7 +234,7 @@ class MathBeats():
                 Mask2_x = sMask2_x * (1 - self.Mask_Smooth[temptick])
                 temptick += 1
                 
-            sleep(1/self.Game_FPS)
+            sleep(1/self.gameFPS)
             pygame.display.flip() #更新屏幕内容
     '''
 
@@ -244,22 +252,20 @@ class MathBeats():
                     inWhile = False
                     self.eventStack[0] = 0
                     break
-                Mask1_x += 5
-                Mask2_x -= 5
+                Mask1_x += 820/self.gameFPS
+                Mask2_x -= 800/self.gameFPS
                 
-                self.Main_Screen.blit(Masks_img_1, (Mask1_x, 0))
-                self.Main_Screen.blit(Masks_img_2, (Mask2_x, 0))
-                sleep(1/self.Game_FPS) # 限制FPS 每秒刷新self.Game_FPS次 也就是每刷新一次等待1/self.Game_FPS秒
+                self.Main_Screen.blit(self.Masks_img_1, (Mask1_x, 0))
+                self.Main_Screen.blit(self.Masks_img_2, (Mask2_x, 0))
+                sleep(1/self.gameFPS) # 限制FPS 每秒刷新self.gameFPS次 也就是每刷新一次等待1/self.gameFPS秒
                 pygame.display.flip()  # 更新屏幕内容
+        afterFunction()  
     def afterChangeTo(self, preFunction, *afterFunctions):
         if afterFunctions:
             pass
         else:
             def afterFunctions():
                 pass
-        sleep(0.2)
-        Masks_img_1 = pygame.image.load(".\data\img\Mask1.png").convert_alpha()
-        Masks_img_2 = pygame.image.load(".\data\img\Mask2.png").convert_alpha()
         Mask1_x = self.LastM1
         Mask2_x = self.LastM2
         inWhile = True
@@ -271,27 +277,67 @@ class MathBeats():
                     inWhile = False
                     self.eventStack[1] = 0
                     break
-                Mask1_x -= 5
-                Mask2_x += 5
+                Mask1_x -= 820/self.gameFPS
+                Mask2_x += 800/self.gameFPS
 
-                self.Main_Screen.blit(Masks_img_1, (Mask1_x, 0))
-                self.Main_Screen.blit(Masks_img_2, (Mask2_x, 0))
+                self.Main_Screen.blit(self.Masks_img_1, (Mask1_x, 0))
+                self.Main_Screen.blit(self.Masks_img_2, (Mask2_x, 0))
 
-                sleep(1/self.Game_FPS)
+                sleep(1/self.gameFPS)
                 pygame.display.flip()  # 更新屏幕内容
-        afterFunctions
-
+        afterFunctions()
+    def selectSongReturnToTheMainScreen(self):
+        '''
+        songFrame = pygame.transform.scale(pygame.image.load(".\\data\\img\\frame.png").convert_alpha(), (400, 400))
+        def temp():
+            # 返回
+            self.showAButton(" ← ", 40, self.notoSansHansBold, (202, 207, 210), 20, 20, self.Main_Screen, False, 2, self.selectSongReturnToTheMainScreen, self.buttonID[2][0])
+                
+            for i in range(len(Song_List)):
+                # 歌曲框
+                self.Main_Screen.blit(songFrame, (320 * i, 100))
+                # 歌曲标题
+                if i == 0:
+                    self.Main_Screen.blit((pygame.font.Font(self.z准雅宋, 35)).render(Song_List[i][0], False, (202, 207, 210)), (125, 140))  # 渲染文字
+                else:
+                    self.Main_Screen.blit((pygame.font.Font(self.z准雅宋, 35)).render(Song_List[i][0], False, (202, 207, 210)), (
+                        110 * (i+1) + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[0], 140))  # 渲染文字
+                # 游玩按钮
+                if i == 0 :
+                    self.showAButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210),
+                                    180
+                                    , 430, self.Main_Screen, False, i+3, self.getIntoGame, self.buttonID[i+3][0])
+                else:
+                    self.showAButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210),
+                                    320 * (i+1) - 140
+                                    , 430, self.Main_Screen, False, i+3, self.getIntoGame, self.buttonID[i+3][0])
+        '''
+        self.selectSongWhileLock = False
+        self.mainScreenLock = True
+        self.eventStack[0] = 1
+        self.beforeChangeTo(self.__returnSaveNone)
+        self.eventStack[1] = 1
+        sleep(0.005)
+        self.afterChangeTo(self._render_start_game)
+    def editorMainScreenReturnToTheMainScreen(self):
+        self.mainScreenLock = True
+        self.editorWhile = False
+        self.eventStack[0] = 1
+        self.beforeChangeTo(self._renderEditor)
+        self.eventStack[1] = 1
+        sleep(0.005)
+        self.afterChangeTo(self._render_start_game)
+    
     # 界面
     def Main_Screen_(self):
-        self.mainScreenLock = False
-        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 开始游戏按钮ID
-        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])
+        '''主界面'''
+        self.mainScreenLock = True
         self.eventStack[0] = 1
         self.beforeChangeTo(self.__returnSaveNone)
         self.eventStack[1] = 1
         self.afterChangeTo(self._render_start_game)
 
-        while True:
+        while self.mainScreenLock:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     # 卸载所有模块
@@ -302,80 +348,141 @@ class MathBeats():
             self.Main_Screen.fill((34, 40, 49))
             self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 450, 200,
                              self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0])
-            self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 450, 500,
-                             self.Main_Screen, self.Antialias, 1, self.createScore, self.buttonID[1][0])
             
-            sleep(1/self.Game_FPS)
-            pygame.display.update()
-    
+            self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 450, 500,
+                             self.Main_Screen, self.Antialias, 1, self.editorMainScreen, self.buttonID[1][0])
+            
+            
+            sleep(1/self.gameFPS)
+            pygame.display.flip()
     def selectSong(self):
-        self.mainGetIntoGameLock = False
+        '''歌曲选择'''
+        self.mainScreenLock = False
         self.eventStack[0] = 1
         self.beforeChangeTo(self._render_start_game)
         self.eventStack[1] = 1
         self.afterChangeTo(self._render_chosing_game)
-
-        while True:
+        songFrame = pygame.transform.scale(pygame.image.load(".\\data\\img\\frame.png").convert_alpha(), (400, 400))
+        self.selectSongWhileLock = True
+        while self.selectSongWhileLock:
             self.Main_Screen.fill((34, 40, 49))
-            songFrame = pygame.transform.scale(
-                pygame.image.load(".\\data\\img\\frame.png"), (400, 400))
+                
             for i in range(len(Song_List)):
                 # 歌曲框
                 self.Main_Screen.blit(songFrame, (320 * i, 100))
+                
                 # 歌曲标题
                 if i == 0:
-                    self.Main_Screen.blit((pygame.font.Font(self.z准雅宋, 35)).render(
-                        Song_List[i][0], self.Antialias, (202, 207, 210)), (125, 140))  # 渲染文字
+                    self.Main_Screen.blit((pygame.font.Font(self.z准雅宋, 35)).render(Song_List[i][0], self.Antialias, (202, 207, 210)), (125, 140))  # 渲染文字
                 else:
                     self.Main_Screen.blit((pygame.font.Font(self.z准雅宋, 35)).render(Song_List[i][0], self.Antialias, (202, 207, 210)), (
                         110 * (i+1) + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[0], 140))  # 渲染文字
+                    
                 # 游玩按钮
-                self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 开始游戏按钮ID
                 if i == 0 :
-                    self.showAButton("Start→", 35, self.z准雅宋, (202, 207, 210),
-                                    150 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
-                                    , 430
-                                    , self.Main_Screen, self.Antialias, i+2, self.getIntoGame, self.buttonID[i+2][0])
+                    self.showAButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210),
+                                    180 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
+                                    , 430, self.Main_Screen, self.Antialias, i+3, self.getIntoGame, self.buttonID[i+3][0])
                 else:
-                    self.showAButton("Start→", 35, self.z准雅宋, (202, 207, 210),
-                                    320 * (i+1) - 170 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
-                                    , 430
-                                    , self.Main_Screen, self.Antialias, i+2, self.getIntoGame, self.buttonID[i+2][0])
-
+                    self.showAButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210),
+                                    320 * (i+1) - 140 # 300 * (i+1) - (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), "Start→"))[0]
+                                    , 430, self.Main_Screen, self.Antialias, i+3, self.getIntoGame, self.buttonID[i+3][0])
+            
+            # 返回
+            self.showAButton(" ← ", 40, self.notoSansHansBold, (202, 207, 210), 20, 20, self.Main_Screen, self.Antialias, 2, self.selectSongReturnToTheMainScreen, self.buttonID[2][0])
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     # 卸载所有模块
                     pygame.quit()
                     # 终止程序，确保退出程序
                     exit()
-            sleep(1/self.Game_FPS)
+            sleep(1/self.gameFPS)
             pygame.display.update()
 
+    # 铺面制作
+    def _renderEditor(self):
+        self.showAButton("新建谱面", 70, self.z准雅宋, (255, 255, 255), 100, 200, self.Main_Screen
+                             , self.Antialias, len(Song_List) + 3, self.__returnSaveNone, self.buttonID[len(Song_List) + 3][0])
+        self.showAButton("继续创作", 70, self.z准雅宋, (255, 255, 255), 100, 380, self.Main_Screen
+                             , self.Antialias, len(Song_List) + 4, self.__returnSaveNone, self.buttonID[len(Song_List) + 4][0])
+    def editorMainScreen(self):
+        self.editorWhile = True
+        self.mainScreenLock = False
+        self.eventStack[0] = 1
+        self.beforeChangeTo(self._render_start_game)
+        self.eventStack[1] = 1
+        self.afterChangeTo(self._renderEditor)
+        
+        while self.editorWhile:
+            self.Main_Screen.fill((34, 40, 49))
+            self.showAButton("新建谱面", 70, self.z准雅宋, (255, 255, 255), 100, 200, self.Main_Screen
+                             , self.Antialias, len(Song_List) + 2, self.createNewScore, self.buttonID[len(Song_List) + 2][0])
+            self.showAButton("继续创作", 70, self.z准雅宋, (255, 255, 255), 100, 380, self.Main_Screen
+                             , self.Antialias, len(Song_List) + 3, self.continueWork, self.buttonID[len(Song_List) + 3][0])
+            
+            # 返回
+            self.showAButton(" ← ", 40, self.notoSansHansBold, (202, 207, 210), 20, 20, self.Main_Screen, self.Antialias, 2, self.editorMainScreenReturnToTheMainScreen, self.buttonID[2][0])
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # 卸载所有模块
+                    pygame.quit()
+                    # 终止程序，确保退出程序
+                    exit()
+            sleep(1/self.gameFPS)
+            pygame.display.update()
+    def createNewScore(self):
+        self.tempScore = {}
+        self.editScore(self.tempScore,[None, None, None, None, None])
+    def continueWork(self):
+        pass
+    def editScore(self,Score: dict,Inf: list):
+        '''
+        Score 铺面   字典
+        Inf 歌曲信息 列表
+            ->[name, author, geneticist, bpm, song]
+            其中song为歌曲全路径
+        '''
+        editScoreWhile = True
+        
+        # 参数未指定处理
+        unknownInf = ["未命名歌曲", "未命名曲师", "未命名谱师", 200, ""]
+        for i in range(len(Inf)):
+            if Inf[i] == None:
+                Inf[i] = unknownInf[i]
+        # 追加歌曲长度
+        if Inf[4] == "":
+            Inf.append(30)
+        else:
+            Inf.append(MP3(Inf[4]).info.length)
+        
+        while editScoreWhile:
+            # 歌曲进度条
+            
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # 卸载所有模块
+                    pygame.quit()
+                    # 终止程序，确保退出程序
+                    exit()
+            sleep(1/self.gameFPS)
+            pygame.display.flip()
+        
+    # 游玩
     def getIntoGame(self):
         '''
         你先别急
         如函数名
         '''
         pass
-    
-    def createScore(self):
-        # def temp():
-        # 加载制谱器
-        #def temp():
-        print("intemp")
-        ScoreEditor = scoreEditor.MathBeatsScoreEditor(self.Main_Screen)
-        ScoreEditor.start()
-        #t = threading.Thread(target=temp)
-        #t.start()
         
-        
-    
+    # 基本函数
     def Keep_Flip(self):
         while True:
             # 游戏状态为 开始游戏
-            if self.Game_State == "start":
+            if self.gameState == "start":
                 self.Start_Screen()  # 进入开始屏幕的循环
-            if self.Game_State == "play":
+            if self.gameState == "play":
                 self.Main_Screen_()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -384,9 +491,8 @@ class MathBeats():
                     # 终止程序，确保退出程序
                     exit()
 
-            sleep(1/self.Game_FPS)
+            sleep(1/self.gameFPS)
             pygame.display.flip()  # 更新屏幕内容
-
     def start(self):
         self.Keep_Flip()
 
