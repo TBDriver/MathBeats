@@ -6,8 +6,6 @@ from mutagen.mp3 import MP3
 import os, pygame, threading, json  # ,bezier
 import widgets, button
 
-import threading
-import widgets
 pygame.init()
 # 加载文件,存档与设置
 try:
