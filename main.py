@@ -7,7 +7,7 @@ import random
 import json  # ,bezier
 from sys import exit
 import threading
-import widgets, scoreEditor
+import widgets
 pygame.init()
 
 
@@ -303,7 +303,7 @@ class MathBeats():
             self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 450, 200,
                              self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0])
             self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 450, 500,
-                             self.Main_Screen, self.Antialias, 1, self.createScore, self.buttonID[1][0])
+                             self.Main_Screen, self.Antialias, 1, self.__createTemp, self.buttonID[1][0])
             
             sleep(1/self.Game_FPS)
             pygame.display.update()
@@ -358,13 +358,17 @@ class MathBeats():
         '''
         pass
     
+    def __createTemp(self):
+        print("L")
+    
     def createScore(self):
         # def temp():
         # 加载制谱器
         #def temp():
         print("intemp")
-        ScoreEditor = scoreEditor.MathBeatsScoreEditor(self.Main_Screen)
-        ScoreEditor.start()
+        import scoreEditor
+        # ScoreEditor = scoreEditor.MathBeatsScoreEditor(self.Main_Screen)
+        # ScoreEditor.start()
         #t = threading.Thread(target=temp)
         #t.start()
         
