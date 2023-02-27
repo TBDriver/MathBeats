@@ -102,7 +102,7 @@ class MathBeats():
         self.Masks_img_1 = pygame.image.load(".\data\img\Mask1.png").convert_alpha()
         self.Masks_img_2 = pygame.image.load(".\data\img\Mask2.png").convert_alpha()
     def __init__(self):
-        self.Main_Screen = pygame.display.set_mode(size=(1054, 600), flags=pygame.DOUBLEBUF, )
+        self.Main_Screen = pygame.display.set_mode(size=(1054, 600), flags=pygame.DOUBLEBUF, depth=32)
         self.gameState = "start"
         self.gameFPS = 180    # FPS
         self.gameTick = pygame.time.Clock()
