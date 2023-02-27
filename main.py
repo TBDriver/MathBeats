@@ -116,9 +116,6 @@ class MathBeats():
         self.__loadingButtonID() # 按钮唯一ID初始化
         self.__loadingPictures() # 图片初始化
         pygame.font.init()       # 文字库初始化
-        pygame.event.set_blocked(pygame.ACTIVEEVENT)
-        pygame.event.set_blocked(pygame.WINDOWENTER)
-        pygame.event.set_blocked(pygame.WINDOWLEAVE)
         pygame.display.set_caption("Mathbeats")
         
         # 加载小组件
@@ -198,6 +195,16 @@ class MathBeats():
                 inTheButton = ((event.pos[0] >= buttonX) and (event.pos[0] <= buttonX + textSize[0])) and ((event.pos[1] >= buttonY) and (event.pos[1] <= buttonY + textSize[1]))
                 if inTheButton: self.buttonID[buttonID][0] = self.buttonID[buttonID][2]   # 悬停事件
                 else:           self.buttonID[buttonID][0] = self.buttonID[buttonID][1]        
+    def showARect(self, x: int, y: int, width: float, height: float, color: tuple):
+        '''
+        x    整型 Rectx值
+        y    整型 Recty值
+        width整型 宽度
+        heigh整型 高度
+        color元组 颜色Hex值
+        '''
+        pygame.draw.rect(self.Main_Screen, color, (pygame.Rect(x, y, width, height)))
+        
     def beforeChangeTo(self, preFunction, *afterFunction):
         if afterFunction:
             pass
@@ -442,7 +449,7 @@ class MathBeats():
             ->[name, author, geneticist, bpm, song]
             其中song为歌曲全路径
         '''
-        editScoreWhile = True
+        self.editScoreWhile = True
         
         # 参数未指定处理
         unknownInf = ["未命名歌曲", "未命名曲师", "未命名谱师", 200, ""]
@@ -455,9 +462,10 @@ class MathBeats():
         else:
             Inf.append(MP3(Inf[4]).info.length)
         
-        while editScoreWhile:
+        while self.editScoreWhile:
+            self.Main_Screen.fill((34, 40, 49))
             # 歌曲进度条
-            
+            self.showARect(0, 0, 1054 ,200, (23, 76, 89))
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
