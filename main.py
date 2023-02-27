@@ -4,8 +4,7 @@ from time import sleep, gmtime
 from sys import exit
 from mutagen.mp3 import MP3
 import os, pygame, threading, json  # ,bezier
-import widgets, button
-from InputRect import InputBox
+from InputRect import InputBox      # 输入框模块 灵感来自网络
 
 pygame.init()
 # 加载文件,存档与设置
