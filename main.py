@@ -116,9 +116,6 @@ class MathBeats():
         self.__loadingPictures() # 图片初始化
         pygame.font.init()       # 文字库初始化
         pygame.display.set_caption("Mathbeats")
-        
-        # 加载小组件
-        self.Widgets = widgets.MathBeatsWidgets()
         '''
         摆了 会用公式不知道怎么应用
         
