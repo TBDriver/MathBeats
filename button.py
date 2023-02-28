@@ -1,9 +1,9 @@
 import pygame
-class button():
+class createButton():
     def __init__(self, text: int, size: str, font: str,
                 color: tuple, buttonX: int, buttonY: int, renderSurface: pygame.Surface,
                 antialias: bool, functions,
-                backgroundColor: list = [(44, 62, 80), (44, 62, 80), (0, 0, 0)]):
+                inActiveColor: tuple = (44, 62, 80), activeColor: tuple = (0, 0, 0)):
         '''
         用于显示按钮
         text: 按钮文本         字符串
@@ -25,17 +25,23 @@ class button():
         self.renderSurface = renderSurface
         self.antialias = antialias
         self.functions = functions
-        self.backgroundColor = backgroundColor
+        
+        self.active = False
+        self.backgroundColor = inActiveColor
+        self.activeColor = activeColor
+        self.inActiveColor = inActiveColor
         
     def draw(self):
         self.buttonFont = pygame.font.Font(self.font, self.size)  # 加载字符
-        self.renderedText = self.renderSurface.blit(self.buttonFont.render(self.text, self.antialias, self.color, self.backgroundColor[0]), (self.buttonX, self.buttonY))  # 渲染文字
-        self.textSize = pygame.font.Font.size(self.buttonFont, self.text)
+        self.renderedText = self.renderSurface.blit(self.buttonFont.render(self.text, self.antialias, self.color, self.backgroundColor), (self.buttonX, self.buttonY))  # 渲染文字
         
     def dealEvent(self, event):
         if event.type == 1025 and self.renderedText.collidepoint(event.pos):
+            print(self.functions)
             self.functions()
         if event.type == 1024:
             # inTheButton = ((event.pos[0] >= buttonX) and (event.pos[0] <= buttonX + textSize[0])) and ((event.pos[1] >= buttonY) and (event.pos[1] <= buttonY + textSize[1]))
-            if self.renderedText.collidepoint(event.pos): self.backgroundColor[0] = self.backgroundColor[2]   # 悬停事件
-            else:           self.backgroundColor[0] = self.backgroundColor[1]
+            if self.renderedText.collidepoint(event.pos): 
+                self.backgroundColor = self.activeColor
+            else: 
+                self.backgroundColor = self.inActiveColor

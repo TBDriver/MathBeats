@@ -1,7 +1,6 @@
 import pygame
-import os
 
-class InputBox:
+class inputBox:
     def __init__(self, rect: pygame.Rect = pygame.Rect(100, 100, 140, 32), font: str = ".\data\\ttf\\狮尾四季春-Regular.ttf", size: int = 18) -> None:
         """
         rect 传入矩形实体 传达输入框的位置和大小
