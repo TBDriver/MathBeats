@@ -77,6 +77,7 @@ class MathBeats():
         self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
         self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
         self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
+        self.s狮尾四季春 = ".\\data\\ttf\\狮尾四季春-Regular.ttf"
     def __eventBusyOrNot(self, event: int):
         '''
         检测时间栈是否繁忙 返回0或1
@@ -253,7 +254,7 @@ class MathBeats():
                 
             sleep(1/self.gameFPS)
             pygame.display.flip() #更新屏幕内容
-    '''
+        '''
 
         Mask1_x = -810
         Mask2_x = 880
@@ -449,8 +450,11 @@ class MathBeats():
         else:               Inf.append(MP3(Inf[4]).info.length)
         
         # 输入框初始化
-        beatInputBox = InputBox(pygame.Rect(20, 150, 140, 32))
-        beatPerSecInputBox = InputBox(pygame.Rect(20, 190, 180, 32))
+        beatInputBox = InputBox(pygame.Rect      (15, 160, 140, 32))
+        beatPerSecInputBox = InputBox(pygame.Rect(15, 230, 140, 32))
+        
+        # 字体预载
+        tipFont = pygame.font.Font(self.s狮尾四季春, 26)
         
         while self.editScoreWhile:
             self.Main_Screen.fill((34, 40, 49))
@@ -460,6 +464,10 @@ class MathBeats():
             # 谱面制作组件
             beatInputBox.draw(self.Main_Screen)
             beatPerSecInputBox.draw(self.Main_Screen)
+            
+            # 提示文字
+            self.Main_Screen.blit(tipFont.render("当前Note拍数", self.Antialias, (255, 255, 240)), (13, 130))
+            self.Main_Screen.blit(tipFont.render("当前Note每拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 200))
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
