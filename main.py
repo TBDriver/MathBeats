@@ -494,7 +494,7 @@ class MathBeats():
         # 按钮初始化
         createNoteButton = createButton("在当前位置创建Note", 26, self.z准雅宋, (255, 240, 240), 1054/2-120, 600-40, self.Main_Screen, self.Antialias, createNote)
         
-                        
+        
         
         while self.editScoreWhile:
             self.Main_Screen.fill((34, 40, 49))
