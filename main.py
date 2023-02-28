@@ -440,7 +440,6 @@ class MathBeats():
         '''
         self.editScoreWhile = True
         
-        
         # 谱面信息参数未指定处理
         unknownInf = ["未命名歌曲", "未命名曲师", "未命名谱师", 200, ""]
         for i in range(len(Inf)):
@@ -449,11 +448,9 @@ class MathBeats():
         if Inf[4] == "":    Inf.append(30)
         else:               Inf.append(MP3(Inf[4]).info.length)
         
-        
         # 输入框初始化
         beatInputBox = InputBox(pygame.Rect(20, 150, 140, 32))
         beatPerSecInputBox = InputBox(pygame.Rect(20, 190, 180, 32))
-        
         
         while self.editScoreWhile:
             self.Main_Screen.fill((34, 40, 49))
@@ -472,7 +469,6 @@ class MathBeats():
                     exit()
                 beatInputBox.dealEvent(event)  # 拍数
                 beatPerSecInputBox.dealEvent(event)  # 每秒间隔
-            
             
             # 获取信息
             beatInputBox.getText()
