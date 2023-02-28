@@ -2,7 +2,7 @@ import pygame
 import os
 
 class InputBox:
-    def __init__(self, rect: pygame.Rect = pygame.Rect(100, 100, 140, 32)) -> None:
+    def __init__(self, rect: pygame.Rect = pygame.Rect(100, 100, 140, 32), font: str = ".\data\\ttf\\狮尾四季春-Regular.ttf", size: int = 18) -> None:
         """
         rect 传入矩形实体 传达输入框的位置和大小
         """
@@ -13,7 +13,7 @@ class InputBox:
         self.active = False
         self.text = ''
         self.done = False
-        self.font = pygame.font.Font(".\data\\ttf\\狮尾四季春-Regular.ttf", 18)
+        self.font = pygame.font.Font(font, size)
 
     def dealEvent(self, event: pygame.event.Event):
         if(event.type == pygame.MOUSEBUTTONDOWN):

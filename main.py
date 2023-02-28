@@ -132,9 +132,9 @@ class MathBeats():
     # 过渡函数
     def _renderStartGame(self):
         # _renderStartGame作为加载时预处理的图像
-        self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 450, 200,
+        self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 420, 100,
                              self.Main_Screen, self.Antialias, 0, self.__returnSaveNone, self.buttonID[0][0])
-        self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 450, 500,
+        self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 420, 300,
                              self.Main_Screen, self.Antialias, 1, self.__returnSaveNone, self.buttonID[1][0])
     def _renderChosingGame(self):
         pass
@@ -342,10 +342,10 @@ class MathBeats():
                     exit()
                     
             self.Main_Screen.fill((34, 40, 49))
-            self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 450, 200,
+            self.showAButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 420, 100,
                              self.Main_Screen, self.Antialias, 0, self.selectSong, self.buttonID[0][0])
             
-            self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 450, 500,
+            self.showAButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 420, 300,
                              self.Main_Screen, self.Antialias, 1, self.editorMainScreen, self.buttonID[1][0])
             
             
@@ -466,8 +466,8 @@ class MathBeats():
             beatPerSecInputBox.draw(self.Main_Screen)
             
             # 提示文字
-            self.Main_Screen.blit(tipFont.render("当前Note拍数", self.Antialias, (255, 255, 240)), (13, 130))
-            self.Main_Screen.blit(tipFont.render("当前Note每拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 200))
+            self.Main_Screen.blit(tipFont.render("当前Note拍数", self.Antialias, (255, 255, 240)), (13, 125))
+            self.Main_Screen.blit(tipFont.render("当前Note每拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 195))
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -491,6 +491,9 @@ class MathBeats():
         如函数名
         '''
         pass
+    
+    
+    
     # 基本函数
     def Keep_Flip(self):
         while True:
