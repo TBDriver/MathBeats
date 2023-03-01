@@ -5,8 +5,7 @@ from sys import exit
 from mutagen.mp3 import MP3
 import os, pygame, json
 
-from inputRect import inputBox      # 输入框模块 灵感来自网络
-from button import createButton     # 按钮模块   完全自制
+from widgets import inputBox, createButton
 
 pygame.init()
 # 加载文件,存档与设置
@@ -455,14 +454,15 @@ class MathBeats():
         if Inf[4] == "":    Inf.append(30)
         else:               Inf.append(MP3(Inf[4]).info.length)
         # 输入框初始化
-        beatInputBox = inputBox(pygame.Rect      (15, 155, 140, 32))
-        beatPerSecInputBox = inputBox(pygame.Rect(15, 210, 140, 32))
-        specInputBox = inputBox(pygame.Rect      (1054-194, 158, 140, 32))
+        beatPerSecInputBox = inputBox(pygame.Rect (15, 150, 140, 32), textPlaceHolder="200 200 200 200 200 200") # 每拍间隔\
+        noSoundBeatInputBox = inputBox(pygame.Rect(15, 210, 140, 32)) # 无音效note
+        questionInputBox = inputBox(pygame.Rect   (1054-232, 198, 140, 32))  # 问题
+        specInputBox = inputBox(rect = pygame.Rect(1054-232, 158, 140, 32), textPlaceHolder="0") # 特效
         # 字体预载
         tipFont = pygame.font.Font(self.s狮尾四季春, 20)
         # 基础变量
         localTick = 0 # 单位毫秒
-        localNoteInf = []
+        localNoteInf = [["每拍停顿时间"], "题目", "正确与否", "特效ID", ["无音效BeatID"]]
         def createNote():
             localNoteTick = 0
             if len(Score["note"]) == 0:
@@ -479,8 +479,9 @@ class MathBeats():
                         Score["note"][str(i)] = localNoteInf # 增加Note
             else:
                 Score["note"][str(0)] = localNoteTick
+            print(Score)
         # 按钮初始化
-        createNoteButton = createButton("在当前位置创建Note", 26, self.z准雅宋, (255, 240, 240), 1054/2-120, 600-40, self.Main_Screen, self.Antialias, createNote)
+        createNoteButton = createButton("在当前位置创建或应用Note", 26, self.z准雅宋, (255, 240, 240), 1054/2-120, 600-40, self.Main_Screen, self.Antialias, createNote)
         
         
         while self.editScoreWhile:
@@ -488,18 +489,32 @@ class MathBeats():
             # 歌曲进度条
             self.showARect(0, 0, 1054 ,130, (23, 76, 89))
             
-            
-            beatInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("当前Note拍数", self.Antialias, (255, 255, 240)), (13, 130))
-            
+
+            # 输入框
             beatPerSecInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("当前Note每拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 188))
+            self.Main_Screen.blit(tipFont.render("当前Note每节拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 130))
             
+            noSoundBeatInputBox.draw(self.Main_Screen)
+            self.Main_Screen.blit(tipFont.render("无音效的节拍(第几个)", self.Antialias, (255, 255, 240)), (13, 184))
+
             specInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("特效选择(0~9)", self.Antialias, (255, 255, 240)), (1054-134, 135))
+            self.Main_Screen.blit(tipFont.render("特效选择(1~9)", self.Antialias, (255, 255, 240)), (1054-134, 135))
+
+            questionInputBox.draw(self.Main_Screen)
+            self.Main_Screen.blit(tipFont.render("Note问题", self.Antialias, (255, 255, 240)), (1054-134, 188))
             
-            
+            # 按钮
             createNoteButton.draw()
+            
+
+            # 更新信息
+            # 每拍间隔
+            localNoteInf[0] = beatPerSecInputBox.getText().split()
+            # Note问题
+            localNoteInf[1] = questionInputBox.getText()
+            # 无音效节拍
+            localNoteInf[4] = noSoundBeatInputBox.getText().split()
+            print(localNoteInf)
             
             
             for event in pygame.event.get():
@@ -508,14 +523,18 @@ class MathBeats():
                     pygame.quit()
                     # 终止程序，确保退出程序
                     exit()
-                beatInputBox.dealEvent(event)  # 拍数
+
+                # 输入框更新事件
                 beatPerSecInputBox.dealEvent(event)  # 每秒间隔
-                specInputBox.dealEvent(event)
-                createNoteButton.dealEvent(event)
+                noSoundBeatInputBox.dealEvent(event) # 无音效Note
+                specInputBox.dealEvent(event)        # 特效
+                questionInputBox.dealEvent(event)    # 问题
+                # 按钮更新事件
+                createNoteButton.dealEvent(event)    # 应用Note
             
-            # 获取信息
-            beatInputBox.getText()
-            beatPerSecInputBox.getText()
+            # 更新信息
+            
+
             sleep(1/self.gameFPS)
             pygame.display.flip()
         
