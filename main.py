@@ -105,7 +105,6 @@ class MathBeats():
         self.eventStack = [0, 0, 0]  # 加载等待ID
 
         self.__fontInit()        # 文字封装初始化
-        self.__loadingButtonID() # 按钮唯一ID初始化
         self.__loadingPictures() # 图片初始化
         pygame.font.init()       # 文字库初始化
         pygame.display.set_caption("Mathbeats")
@@ -392,7 +391,6 @@ class MathBeats():
         self.createNewScoreButton.draw()
         self.continueWorkButton.draw()
         '''
-
     def editorMainScreen(self):
         self.eventStack[0] = 1
         self.beforeChangeTo(self._renderStartGame)
@@ -459,7 +457,7 @@ class MathBeats():
         # 输入框初始化
         beatInputBox = inputBox(pygame.Rect      (15, 155, 140, 32))
         beatPerSecInputBox = inputBox(pygame.Rect(15, 210, 140, 32))
-        specInputBox = inputBox(pygame.Rect      (1054-194, 170, 140, 32))
+        specInputBox = inputBox(pygame.Rect      (1054-194, 158, 140, 32))
         # 字体预载
         tipFont = pygame.font.Font(self.s狮尾四季春, 20)
         # 基础变量
@@ -475,12 +473,12 @@ class MathBeats():
                         localNoteTick += j
                         localNoteTick += Score["note"][i][4]
                         
-                    if localNoteTick == localTick:         # 当选中时间点为Note开始时间点时
-                        Score["note"][i] = localNoteInf    # 对当前Note信息进行覆盖
+                    if localNoteTick == localTick:            # 当选中时间点为Note开始时间点时
+                        Score["note"][i] = localNoteInf       # 对当前Note信息进行覆盖
                     else:
-                        Score["note"].append(localNoteTick)# 增加Note
+                        Score["note"][str(i)] = localNoteInf # 增加Note
             else:
-                Score["note"].append(localNoteTick)
+                Score["note"][str(0)] = localNoteTick
         # 按钮初始化
         createNoteButton = createButton("在当前位置创建Note", 26, self.z准雅宋, (255, 240, 240), 1054/2-120, 600-40, self.Main_Screen, self.Antialias, createNote)
         
@@ -492,13 +490,13 @@ class MathBeats():
             
             
             beatInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("当前Note拍数", self.Antialias, (255, 255, 240)), (13, 125))
+            self.Main_Screen.blit(tipFont.render("当前Note拍数", self.Antialias, (255, 255, 240)), (13, 130))
             
             beatPerSecInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("当前Note每拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 181))
+            self.Main_Screen.blit(tipFont.render("当前Note每拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 188))
             
             specInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("特效选择(0~9)", self.Antialias, (255, 255, 240)), (1054-134, 130))
+            self.Main_Screen.blit(tipFont.render("特效选择(0~9)", self.Antialias, (255, 255, 240)), (1054-134, 135))
             
             
             createNoteButton.draw()
