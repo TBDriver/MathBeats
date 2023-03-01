@@ -456,8 +456,8 @@ class MathBeats():
         # 输入框初始化
         beatPerSecInputBox = inputBox(pygame.Rect (15, 150, 140, 32), textPlaceHolder="200 200 200 200 200 200") # 每拍间隔\
         noSoundBeatInputBox = inputBox(pygame.Rect(15, 210, 140, 32)) # 无音效note
-        questionInputBox = inputBox(pygame.Rect   (1054-232, 198, 140, 32))  # 问题
-        specInputBox = inputBox(rect = pygame.Rect(1054-232, 158, 140, 32), textPlaceHolder="0") # 特效
+        questionInputBox = inputBox(pygame.Rect   (1054-202, 210, 140, 32))  # 问题
+        specInputBox = inputBox(rect = pygame.Rect(1054-202, 150, 140, 32), textPlaceHolder="0") # 特效
         # 字体预载
         tipFont = pygame.font.Font(self.s狮尾四季春, 20)
         # 基础变量
@@ -498,10 +498,10 @@ class MathBeats():
             self.Main_Screen.blit(tipFont.render("无音效的节拍(第几个)", self.Antialias, (255, 255, 240)), (13, 184))
 
             specInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("特效选择(1~9)", self.Antialias, (255, 255, 240)), (1054-134, 135))
+            self.Main_Screen.blit(tipFont.render("特效选择(1~9)", self.Antialias, (255, 255, 240)), (1054-134, 130))
 
             questionInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("Note问题", self.Antialias, (255, 255, 240)), (1054-134, 188))
+            self.Main_Screen.blit(tipFont.render("Note问题", self.Antialias, (255, 255, 240)), (1054-88, 184))
             
             # 按钮
             createNoteButton.draw()
@@ -512,6 +512,8 @@ class MathBeats():
             localNoteInf[0] = beatPerSecInputBox.getText().split()
             # Note问题
             localNoteInf[1] = questionInputBox.getText()
+            # 特效
+            localNoteInf[3] = specInputBox.getText()
             # 无音效节拍
             localNoteInf[4] = noSoundBeatInputBox.getText().split()
             print(localNoteInf)
@@ -531,8 +533,6 @@ class MathBeats():
                 questionInputBox.dealEvent(event)    # 问题
                 # 按钮更新事件
                 createNoteButton.dealEvent(event)    # 应用Note
-            
-            # 更新信息
             
 
             sleep(1/self.gameFPS)
