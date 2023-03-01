@@ -89,16 +89,6 @@ class MathBeats():
             if i and i != event:
                 return 1
         return 0
-    def __loadingButtonID(self):
-        self.buttonID = []     # 按钮ID初始化
-        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 开始游戏按钮ID
-        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 铺面制作按钮ID
-        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 选择歌曲返回按钮ID
-        # buttonID三个元素
-        for i in range(len(Song_List)): # 歌曲buttonID
-            self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 歌曲开始按钮ID
-        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 铺面制作ID
-        self.buttonID.append([(44, 62, 80), (44, 62, 80), (0, 0, 0)])  # 继续制作ID
     def __loadingPictures(self):
         self.songFrame = pygame.transform.scale(pygame.image.load(".\\data\\img\\frame.png").convert_alpha(), (400, 400))
         self.Title_img = pygame.transform.scale(pygame.image.load(".\data\img\Title.png").convert_alpha(), (400, 400))
