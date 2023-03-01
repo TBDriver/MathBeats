@@ -31,9 +31,9 @@ class createButton():
         self.backgroundColor = inActiveColor
         self.activeColor = activeColor
         self.inActiveColor = inActiveColor
+        self.buttonFont = pygame.font.Font(self.font, self.size)  # 加载字符
         
     def draw(self):
-        self.buttonFont = pygame.font.Font(self.font, self.size)  # 加载字符
         self.renderedText = self.renderSurface.blit(self.buttonFont.render(self.text, self.antialias, self.color, self.backgroundColor), (self.buttonX, self.buttonY))  # 渲染文字
         
     def dealEvent(self, event):
@@ -46,10 +46,7 @@ class createButton():
             else: 
                 self.backgroundColor = self.inActiveColor
 
-
-
-
-class inputBox:
+class inputBox():
     def __init__(self, rect: pygame.Rect = pygame.Rect(100, 100, 140, 32), font: str = ".\data\\ttf\\狮尾四季春-Regular.ttf", size: int = 18, textPlaceHolder = "") -> None:
         """
         rect 传入矩形实体 传达输入框的位置和大小
@@ -90,3 +87,31 @@ class inputBox:
 
     def getText(self):
         return self.text
+
+class checkBox():
+    def __init__(self, renderSurface: pygame.Surface, boxX: int, boxY: int, length = 20, frame = 2, frameColor = pygame.Color('lightskyblue3'), backgroundColor = (44, 62, 80)):
+        self.renderSurface = renderSurface
+        self.boxX = boxX
+        self.boxY = boxY
+        self.length = length
+        self.frame = frame
+        self.frameColor = frameColor
+        self.backgroundColor = backgroundColor
+        self.active = False
+    
+    def draw(self):
+        self.outerRect = pygame.draw.rect(self.renderSurface, self.frameColor, pygame.Rect(self.boxX, self.boxY, self.length, self.length))
+        if self.active:
+            self.selectedRect = pygame.draw.rect(self.renderSurface, self.frameColor, pygame.Rect(self.boxX + self.frame, self.boxY + self.frame, self.length - 2*self.frame, self.length - 2*self.frame))
+        else:
+            self.insideRect = pygame.draw.rect(self.renderSurface, self.backgroundColor, pygame.Rect(self.boxX + self.frame, self.boxY + self.frame, self.length - 2*self.frame, self.length - 2*self.frame))
+    
+    def dealEvent(self, event):
+        if(event.type == pygame.MOUSEBUTTONDOWN):
+            if(self.outerRect.collidepoint(event.pos)):  # 若按下鼠标且位置在文本框
+                self.active = not self.active
+            else:
+                self.active = False
+    
+    def returnAcitve(self) -> bool:
+        return self.active

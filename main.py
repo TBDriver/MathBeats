@@ -5,7 +5,7 @@ from sys import exit
 from mutagen.mp3 import MP3
 import os, pygame, json
 
-from widgets import inputBox, createButton
+from widgets import *
 
 pygame.init()
 # 加载文件,存档与设置
@@ -454,18 +454,50 @@ class MathBeats():
         if Inf[4] == "":    Inf.append(30)
         else:               Inf.append(MP3(Inf[4]).info.length)
         # 输入框初始化
-        beatPerSecInputBox = inputBox(pygame.Rect (15, 150, 140, 32), textPlaceHolder="200 200 200 200 200 200") # 每拍间隔\
-        noSoundBeatInputBox = inputBox(pygame.Rect(15, 210, 140, 32)) # 无音效note
-        questionInputBox = inputBox(pygame.Rect   (1054-202, 210, 140, 32))  # 问题
-        specInputBox = inputBox(rect = pygame.Rect(1054-202, 150, 140, 32), textPlaceHolder="0") # 特效
+        beatPerSecInputBox = inputBox(pygame.Rect (15, 150, 140, 32), textPlaceHolder="200 200 200 200 200 200") # 每拍间隔
+        noSoundBeatInputBox = inputBox(pygame.Rect(15, 210, 140, 32))                               # 无音效note
+        timeAfterBeatInputBox = inputBox(pygame.Rect  (15, 270, 140, 32), textPlaceHolder="200")    # 拍后间隔
+        questionInputBox = inputBox(pygame.Rect  (1054-202, 210, 140, 32), textPlaceHolder="7^2=49")# 问题
+        specInputBox = inputBox(pygame.Rect(1054-202, 150, 140, 32), textPlaceHolder="0")           # 特效
         # 字体预载
         tipFont = pygame.font.Font(self.s狮尾四季春, 20)
+        # 复选框初始化
+        checkIfCheckBox = checkBox(self.Main_Screen, 1054-52, 250, 50, 3)
         # 基础变量
         localTick = 0 # 单位毫秒
-        localNoteInf = [["每拍停顿时间"], "题目", "正确与否", "特效ID", ["无音效BeatID"]]
+        localNoteInf = [["每拍停顿时间"], "题目", "正确与否", "特效ID", ["无音效BeatID"], "拍后间隔"]
         def createNote():
-            localNoteTick = 0
-            if len(Score["note"]) == 0:
+            eachNoteTick = []  # 每拍时长以及当前时长
+            localNoteTick = 0  # 当前note时长
+            duratation = 0     # 总时长
+            # 判断Score中Note数量
+            if len(Score["note"]) != 0:                 # 有其他Note时
+                
+                # 处理此前note时长
+                for i in range(len(Score["note"])):     # i遍历谱面中每一个Note
+                    eachNoteTick.append([])
+                    localNoteTick = 0
+                    for j in range(len(Score["note"][i])): # j遍历Note中的每个信息
+                        for k in range(len(Score["note"][i][0])): # 遍历每拍间隔
+                            localNoteTick += int(Score["note"][i][0][k])
+                        localNoteTick += int(Score["note"][i][5])
+                    duratation += localNoteTick
+                    eachNoteTick[i].append(localNoteTick)
+                    eachNoteTick[i].append(duratation)
+                print(eachNoteTick)
+                print(duratation)
+                # Todo 根据当前时长增加note
+                Score["note"].append(localNoteInf)
+                
+            else: # 是首个Note
+                Score["note"].append([]) # 增加Note
+                Score["note"][0] = localNoteInf
+            print(Score)
+            
+            
+            
+            '''
+            if len(Score["note"]) != 0:
                 for i in range(len(Score["note"])):
                     # 目前i=note数量
                     for j in Score["note"][i][0]:
@@ -476,35 +508,39 @@ class MathBeats():
                     if localNoteTick == localTick:            # 当选中时间点为Note开始时间点时
                         Score["note"][i] = localNoteInf       # 对当前Note信息进行覆盖
                     else:
-                        Score["note"][str(i)] = localNoteInf # 增加Note
+                        Score["note"][i] = localNoteInf # 增加Note
             else:
-                Score["note"][str(0)] = localNoteTick
-            print(Score)
+                Score["note"][0] = localNoteTick
+            '''
         # 按钮初始化
         createNoteButton = createButton("在当前位置创建或应用Note", 26, self.z准雅宋, (255, 240, 240), 1054/2-120, 600-40, self.Main_Screen, self.Antialias, createNote)
-        
         
         while self.editScoreWhile:
             self.Main_Screen.fill((34, 40, 49))
             # 歌曲进度条
             self.showARect(0, 0, 1054 ,130, (23, 76, 89))
-            
 
             # 输入框
             beatPerSecInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("当前Note每节拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 130))
+            self.Main_Screen.blit(tipFont.render("当前Note每节拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 128))
             
             noSoundBeatInputBox.draw(self.Main_Screen)
             self.Main_Screen.blit(tipFont.render("无音效的节拍(第几个)", self.Antialias, (255, 255, 240)), (13, 184))
 
+            timeAfterBeatInputBox.draw(self.Main_Screen)
+            self.Main_Screen.blit(tipFont.render("拍后间隔(ms)", self.Antialias, (255, 255, 240)), (13, 210))
+            
             specInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("特效选择(1~9)", self.Antialias, (255, 255, 240)), (1054-134, 130))
+            self.Main_Screen.blit(tipFont.render("特效选择(1~9)", self.Antialias, (255, 255, 240)), (1054-134, 128))
 
             questionInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("Note问题", self.Antialias, (255, 255, 240)), (1054-88, 184))
+            self.Main_Screen.blit(tipFont.render("Note对应问题", self.Antialias, (255, 255, 240)), (1054-128, 184))
             
             # 按钮
             createNoteButton.draw()
+            
+            # 复选框
+            checkIfCheckBox.draw()
             
 
             # 更新信息
@@ -512,10 +548,14 @@ class MathBeats():
             localNoteInf[0] = beatPerSecInputBox.getText().split()
             # Note问题
             localNoteInf[1] = questionInputBox.getText()
+            # 问题对错
+            localNoteInf[2] = checkIfCheckBox.returnAcitve()
             # 特效
             localNoteInf[3] = specInputBox.getText()
             # 无音效节拍
             localNoteInf[4] = noSoundBeatInputBox.getText().split()
+            # 拍后间隔
+            localNoteInf[5] = timeAfterBeatInputBox.getText()
             print(localNoteInf)
             
             
@@ -527,12 +567,15 @@ class MathBeats():
                     exit()
 
                 # 输入框更新事件
-                beatPerSecInputBox.dealEvent(event)  # 每秒间隔
-                noSoundBeatInputBox.dealEvent(event) # 无音效Note
-                specInputBox.dealEvent(event)        # 特效
-                questionInputBox.dealEvent(event)    # 问题
+                beatPerSecInputBox.dealEvent(event)   # 每秒间隔
+                noSoundBeatInputBox.dealEvent(event)  # 无音效Note
+                timeAfterBeatInputBox.dealEvent(event)# 拍后间隔
+                specInputBox.dealEvent(event)         # 特效
+                questionInputBox.dealEvent(event)     # 问题
                 # 按钮更新事件
-                createNoteButton.dealEvent(event)    # 应用Note
+                createNoteButton.dealEvent(event)     # 应用Note
+                # 复选框更新事件
+                checkIfCheckBox.dealEvent(event)
             
 
             sleep(1/self.gameFPS)
