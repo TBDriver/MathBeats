@@ -10,25 +10,18 @@ from scoreEditor import MathBeatsScoreEditor
 
 pygame.init()
 # 加载文件,存档与设置
-try:
-    os.mkdir(".\config")
-except:
-    pass
-try:
-    os.mkdir(".\data")
-except:
-    pass
-try:
-    os.mkdir(".\cache")
-except:
-    pass
+try:os.mkdir(".\config")
+except:pass
+try:os.mkdir(".\data")
+except:pass
+try:os.mkdir(".\cache")
+except:pass
 with open(".\config\config.mb", "r+") as f:
     READ_CONFIG_DATA = f.read()  # 读取设置
     CONFIG_DATA = READ_CONFIG_DATA.split("\n")
 with open(".\config\save.mb", "r+") as f:
     global Save_Time
     Save_Time = gmtime(os.path.getmtime(".\config\save.mb"))
-
 
 # 加载歌曲
 global Song_List
@@ -42,29 +35,8 @@ for i in range(len(Songs)):  # 查找歌曲
             Song_List[i].append(line.strip())
     with open(".\data\music\\" + Songs[i-1] + ".\score.json", encoding="utf-8") as f:
         Score_List.append(json.load(f))
-        print(Score_List)
-        print(Song_List)
-
-'''
-| 歌曲信息 - song.ini
-第1行: 歌曲名
-第2行: 作者名
-第3行: 铺师名
-第4行: 歌曲难度
-第5行:  BPM
-========================================
-| 铺面信息 - score
-使用方法：
-Score_List[谱面索引 -> int] -> 锁定歌曲
-            [Note索引 -> str] -> 锁定音符
-            [Note信息 -> int] -> 锁定信息
-Note信息 对应:
-0 字典   每拍间隔
-1 字符串 题目
-2 布尔值 正确与否
-3 字符串 特殊动作
-'''
-
+        
+        
 
 class MathBeats():
     # 预处理
@@ -94,6 +66,12 @@ class MathBeats():
         self.Title_img = pygame.transform.scale(pygame.image.load(".\data\img\Title.png").convert_alpha(), (400, 400))
         self.Masks_img_1 = pygame.image.load(".\data\img\Mask1.png").convert_alpha()
         self.Masks_img_2 = pygame.image.load(".\data\img\Mask2.png").convert_alpha()
+    def __offset(self):
+        self.offset = [(0, 0), (0, 0, 0)]  # 偏移值
+        '''
+        [0]: 位置偏移       元组
+        [1]: 色彩偏移       元组
+        '''
     def __init__(self):
         self.Main_Screen = pygame.display.set_mode(size=(1054, 600), flags=pygame.DOUBLEBUF, depth=32)
         self.gameState = "start"
@@ -106,6 +84,7 @@ class MathBeats():
 
         self.__fontInit()        # 文字封装初始化
         self.__loadingPictures() # 图片初始化
+        self.__offset()          # 偏移值
         pygame.font.init()       # 文字库初始化
         pygame.display.set_caption("Mathbeats")
         '''
@@ -119,7 +98,7 @@ class MathBeats():
             self.Mask_Smooth   = bezier.Calculator_bezier(0.42, 0,    0.58, 1,    self.gameFPS)
             self.Slider_Smooth = bezier.Calculator_bezier(0.6,  0.65, 0.35, 0.94, self.gameFPS)
         '''
-
+    
     # 过渡函数
     def _renderStartGame(self):
         # _renderStartGame作为加载时预处理的图像
@@ -153,25 +132,6 @@ class MathBeats():
             pygame.display.flip()  # 更新屏幕内容
 
     # 功能性函数
-    def showAComboBox(self, options: list, strSize: int, boxSize: int, font: str,
-                    color: tuple, boxX: int, boxY: int,
-                    antialias: bool, renderSurface: pygame.Surface, tip: str, 
-                    backgroundColor: tuple = (255, 255, 255)):
-        '''
-        用于显示按钮
-        options: 选项文本      列表
-        strSize: 文本大小      整型
-        boxSize  下拉框大小    元组
-        font: 使用字体路径     字符串
-        color:文本颜色         元组    其中接受三个参数
-        boxX&Y: 下拉框xy值    整型    用于按钮置放和悬停表现
-        antialias: 抗锯齿与否  布尔值
-        renderSurface: 作用Surface对象
-        tip:     待选文字      字符串
-        backgroundColor 背景色 元组
-        '''
-        boxFont = pygame.font.Font(font, strSize)
-        self.showARect(boxX, boxY, boxSize[0], boxSize[1], color)
     def showARect(self, x: int, y: int, width: float, height: float, color: tuple):
         '''
         x    整型 Rectx值
@@ -295,17 +255,9 @@ class MathBeats():
         self.eventStack[1] = 1
         sleep(0.005)
         self.afterChangeTo(self._renderStartGame)
-    def editorMainScreenReturnToTheMainScreen(self):
-        self.mainScreenLock = True
-        self.editorWhile = False
-        self.eventStack[0] = 1
-        self.beforeChangeTo(self._renderEditor)
-        self.eventStack[1] = 1
-        sleep(0.005)
-        self.afterChangeTo(self._renderStartGame)
     def getIntoScoreEditor(self):
-        MBSE = MathBeatsScoreEditor(self.Antialias, (self.gameFPS, self.Main_Screen, self.eventStack))
-        MBSE.editorMainScreen()
+        MBSE = MathBeatsScoreEditor(self.Antialias, (self.gameFPS, self.Main_Screen, self.eventStack), self.offset)
+        MBSE.start()
     
     # 界面
     def Main_Screen_(self):
@@ -319,7 +271,7 @@ class MathBeats():
         startGameButton = createButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 420, 100,
                                 self.Main_Screen, self.Antialias, self.selectSong)
         scoreEditButton = createButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 420, 300,
-                                self.Main_Screen, self.Antialias, MathBeatsScoreEditor.editorMainScreen)
+                                self.Main_Screen, self.Antialias, self.getIntoScoreEditor)
         while self.mainScreenLock:
             self.Main_Screen.fill((34, 40, 49))
             
@@ -370,8 +322,6 @@ class MathBeats():
                 selectButtonList[i].draw()
             returnButton.draw()
             
-            
-            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     # 卸载所有模块
@@ -385,241 +335,7 @@ class MathBeats():
                 
             sleep(1/self.gameFPS)
             pygame.display.update()
-
-    # 铺面制作
-    def _renderEditor(self):
-        pass
-        '''
-        self.returnButton.draw()
-        self.createNewScoreButton.draw()
-        self.continueWorkButton.draw()
-        '''
-    def editorMainScreen(self):
-        self.eventStack[0] = 1
-        self.beforeChangeTo(self._renderStartGame)
-        
-        self.returnButton = createButton(" ← ", 40, self.notoSansHansBold, (202, 207, 210), 20, 20, self.Main_Screen, self.Antialias, self.editorMainScreenReturnToTheMainScreen)
-        self.createNewScoreButton = createButton("新建谱面", 70, self.z准雅宋, (255, 255, 255), 100, 200, self.Main_Screen
-                             , self.Antialias, self.createNewScore)
-        self.continueWorkButton = createButton("继续创作", 70, self.z准雅宋, (255, 255, 255), 100, 380, self.Main_Screen
-                             , self.Antialias, self.continueWork)
-
-        self.editorWhile = True
-        self.mainScreenLock = False
-        pygame.display.set_caption("Mathbeats 铺面制作器")
-        
-        self.eventStack[1] = 1
-        self.afterChangeTo(self._renderEditor)
-        
-        while self.editorWhile:
-            self.Main_Screen.fill((34, 40, 49))
-
-            self.returnButton.draw()
-            self.createNewScoreButton.draw()
-            self.continueWorkButton.draw()
-            
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    # 卸载所有模块
-                    pygame.quit()
-                    # 终止程序，确保退出程序
-                    exit()
-                
-                self.returnButton.dealEvent(event)
-                self.createNewScoreButton.dealEvent(event)
-                self.continueWorkButton.dealEvent(event)
-                
-            sleep(1/self.gameFPS)
-            pygame.display.update()
-    def createNewScore(self):
-        self.tempScore = {
-            "note": []
-        }
-        self.editScore(self.tempScore,[None, None, None, None, None])
-    def continueWork(self):
-        pass
-    def editScore(self,Score: dict,Inf: list):
-        '''
-        Score 铺面   字典
-        Inf 歌曲信息 列表
-            ->[name, author, geneticist, bpm, song]s
-            其中song为歌曲全路径
-        '''
-        self.editScoreWhile = True
-        
-        # 谱面信息参数未指定处理
-        unknownInf = ["未命名歌曲", "未命名曲师", "未命名谱师", 200, "0:30"]
-        for i in range(len(Inf)):
-            if Inf[i] == None:  Inf[i] = unknownInf[i]
-        # 追加歌曲时长
-        if Inf[4] == "":    Inf.append(30)
-        else:               Inf.append(MP3(Inf[4]).info.length)
-        # 函数-创建或应用Note
-        def createNote():
-            eachNoteTick = []  # 每拍时长以及当前时长
-            localNoteTick = 0  # 当前note时长
-            duratation = 0     # 总时长
-            # 判断Score中Note数量
-            if len(Score["note"]) != 0:                 # 有其他Note时
-                
-                # 处理此前note时长
-                for i in range(len(Score["note"])):     # i遍历谱面中每一个Note
-                    eachNoteTick.append([])
-                    localNoteTick = 0
-                    for j in range(len(Score["note"][i])): # j遍历Note中的每个信息
-                        for k in range(len(Score["note"][i][0])): # 遍历每拍间隔
-                            localNoteTick += int(Score["note"][i][0][k])
-                        localNoteTick += int(Score["note"][i][5])
-                    duratation += localNoteTick
-                    eachNoteTick[i].append(localNoteTick)
-                    eachNoteTick[i].append(duratation)
-                print(eachNoteTick)
-                print(duratation)
-                # Todo 根据当前时长增加note
-                Score["note"].append(localNoteInf)
-                
-            else: # 是首个Note
-                Score["note"].append([]) # 增加Note
-                Score["note"][0] = localNoteInf
-            print(Score)
-            
-            
-            
-            '''
-            if len(Score["note"]) != 0:
-                for i in range(len(Score["note"])):
-                    # 目前i=note数量
-                    for j in Score["note"][i][0]:
-                        # 进行时间累加
-                        localNoteTick += j
-                        localNoteTick += Score["note"][i][4]
-                        
-                    if localNoteTick == localTick:            # 当选中时间点为Note开始时间点时
-                        Score["note"][i] = localNoteInf       # 对当前Note信息进行覆盖
-                    else:
-                        Score["note"][i] = localNoteInf # 增加Note
-            else:
-                Score["note"][0] = localNoteTick
-            '''
-        # 函数-更改歌曲信息
-        def changeInf():
-            # 外边框
-            pygame.draw.rect(self.Main_Screen, (38, 55, 70), pygame.Rect(300, 100, 450, 400))
-            songNameInputBox.draw(self.Main_Screen)
-            composerInputBox.draw(self.Main_Screen)
-            geneticistNameInputBox.draw(self.Main_Screen)
-            inReverseChangeInfButton.draw()
-        # 函数-改变信息编辑栏状态
-        def reverseChangeInfBool():
-            global changeInfActive
-            changeInfActive = not changeInfActive
-        # 输入框初始化
-        beatPerSecInputBox = inputBox(pygame.Rect (15, 150, 140, 32), textPlaceHolder="200 200 200 200 200 200") # 每拍间隔
-        noSoundBeatInputBox = inputBox(pygame.Rect(15, 210, 140, 32))                               # 无音效note
-        timeAfterBeatInputBox = inputBox(pygame.Rect  (15, 270, 140, 32), textPlaceHolder="200")    # 拍后间隔
-        questionInputBox = inputBox(pygame.Rect  (1054-202, 210, 140, 32), textPlaceHolder="7^2=49")# 问题
-        specInputBox = inputBox(pygame.Rect(1054-202, 150, 140, 32), textPlaceHolder="0")
-        # 特效
-        songNameInputBox = inputBox(pygame.Rect(320, 120, 140, 32), textPlaceHolder=Inf[0])       # 歌曲名
-        composerInputBox = inputBox(pygame.Rect(320, 160, 140, 32) , textPlaceHolder="未命名曲师")   # 曲师
-        geneticistNameInputBox = inputBox(pygame.Rect(320, 200, 140, 32), textPlaceHolder="未命名谱师")# 谱师
-        difficultyInputBox = inputBox(pygame.Rect(320, 240, 140, 32), textPlaceHolder="")
-        # 按钮初始化
-        createNoteButton = createButton("在当前位置创建或应用Note", 26, self.z准雅宋, (255, 240, 240), 1054/2-120, 560, self.Main_Screen, self.Antialias, createNote)
-        changeSongInfButton = createButton("更改歌曲信息", 26, self.z准雅宋, (255, 255, 240), 1054 - 300, 560, self.Main_Screen, self.Antialias, reverseChangeInfBool)
-        inReverseChangeInfButton = createButton(" → ", 40, self.notoSansHansBold, (178, 202, 210), 675, 115, self.Main_Screen, self.Antialias, reverseChangeInfBool)
-        # 复选框初始化
-        checkIfCheckBox = checkBox(self.Main_Screen, 1054-52, 250, 50, 3)
-        # 字体预载
-        tipFont = pygame.font.Font(self.s狮尾四季春, 20)
-        # 基础变量
-        global changeInfActive
-        localTick = 0 # 单位毫秒
-        localNoteInf = [["每拍停顿时间"], "题目", "正确与否", "特效ID", ["无音效BeatID"], "拍后间隔"]
-        localSongInf = ["未命名歌曲", "未命名曲师", "未命名谱师", "未指定难度"]
-        changeInfActive = False
-        changeInfEvents = [songNameInputBox, composerInputBox, geneticistNameInputBox, inReverseChangeInfButton]
-        
-        
-        while self.editScoreWhile:
-            self.Main_Screen.fill((34, 40, 49))
-            # 歌曲进度条
-            self.showARect(0, 0, 1054 ,130, (23, 76, 89))
-            
-            # 输入框
-            beatPerSecInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("当前Note每节拍间隔(ms)", self.Antialias, (255, 255, 240)), (13, 128))
-            
-            noSoundBeatInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("无音效的节拍(第几个)", self.Antialias, (255, 255, 240)), (13, 184))
-
-            timeAfterBeatInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("拍后间隔(ms)", self.Antialias, (255, 255, 240)), (13, 235))
-            
-            specInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("特效选择(1~9)", self.Antialias, (255, 255, 240)), (1054-134, 128))
-
-            questionInputBox.draw(self.Main_Screen)
-            self.Main_Screen.blit(tipFont.render("Note对应问题", self.Antialias, (255, 255, 240)), (1054-128, 184))
-            
-            # 按钮
-            createNoteButton.draw()
-            changeSongInfButton.draw()
-            
-            # 复选框
-            checkIfCheckBox.draw()
-            
-            # 是否更改信息
-            if changeInfActive:
-                changeInf()
-                
-
-            # 更新信息
-            # 每拍间隔
-            localNoteInf[0] = beatPerSecInputBox.getText().split()
-            # Note问题
-            localNoteInf[1] = questionInputBox.getText()
-            # 问题对错
-            localNoteInf[2] = checkIfCheckBox.returnAcitve()
-            # 特效
-            localNoteInf[3] = specInputBox.getText()
-            # 无音效节拍
-            localNoteInf[4] = noSoundBeatInputBox.getText().split()
-            # 拍后间隔
-            localNoteInf[5] = timeAfterBeatInputBox.getText()
-            
-            
-            
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    # 卸载所有模块
-                    pygame.quit()
-                    # 终止程序，确保退出程序
-                    exit()
-
-                # 输入框更新事件
-                beatPerSecInputBox.dealEvent(event)   # 每秒间隔
-                noSoundBeatInputBox.dealEvent(event)  # 无音效Note
-                timeAfterBeatInputBox.dealEvent(event)# 拍后间隔
-                specInputBox.dealEvent(event)         # 特效
-                questionInputBox.dealEvent(event)     # 问题
-                try:    inReverseChangeInfButton.dealEvent(event)
-                except: pass
-                # 按钮更新事件
-                createNoteButton.dealEvent(event)     # 应用Note
-                changeSongInfButton.dealEvent(event)
-                # 复选框更新事件
-                checkIfCheckBox.dealEvent(event)
-                
-                
-                if changeInfActive:
-                    for i in changeInfEvents:
-                        i.dealEvent(event)
-                
-
-            sleep(1/self.gameFPS)
-            pygame.display.flip()
-        
+    
     # 游玩
     def getIntoGame(self):
         '''
@@ -627,8 +343,6 @@ class MathBeats():
         如函数名
         '''
         pass
-    
-    
     
     # 基本函数
     def Keep_Flip(self):

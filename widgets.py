@@ -91,7 +91,7 @@ class inputBox():
         return self.text
 
 class checkBox():
-    def __init__(self, renderSurface: pygame.Surface, boxX: int, boxY: int, length = 20, frame = 2, frameColor = pygame.Color('lightskyblue3'), backgroundColor = (44, 62, 80)):
+    def __init__(self, renderSurface: pygame.Surface, boxX: int, boxY: int, length = 20, frame = 2, active = False, frameColor = pygame.Color('lightskyblue3'), backgroundColor = (44, 62, 80)):
         self.renderSurface = renderSurface
         self.boxX = boxX
         self.boxY = boxY
@@ -99,7 +99,7 @@ class checkBox():
         self.frame = frame
         self.frameColor = frameColor
         self.backgroundColor = backgroundColor
-        self.active = False
+        self.active = active
     
     def draw(self):
         self.outerRect = pygame.draw.rect(self.renderSurface, self.frameColor, pygame.Rect(self.boxX, self.boxY, self.length, self.length))
@@ -112,8 +112,6 @@ class checkBox():
         if(event.type == pygame.MOUSEBUTTONDOWN):
             if(self.outerRect.collidepoint(event.pos)):  # 若按下鼠标且位置在文本框
                 self.active = not self.active
-            else:
-                self.active = False
     
     def returnAcitve(self) -> bool:
         return self.active
