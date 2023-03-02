@@ -32,11 +32,13 @@ class createButton():
         self.activeColor = activeColor
         self.inActiveColor = inActiveColor
         self.buttonFont = pygame.font.Font(self.font, self.size)  # 加载字符
+        self.renderedText = self.renderSurface.blit(self.buttonFont.render(self.text, self.antialias, self.color, self.backgroundColor), (self.buttonX, self.buttonY))
+
         
     def draw(self):
         self.renderedText = self.renderSurface.blit(self.buttonFont.render(self.text, self.antialias, self.color, self.backgroundColor), (self.buttonX, self.buttonY))  # 渲染文字
         
-    def dealEvent(self, event):
+    def dealEvent(self, event: pygame.event.Event):
         if event.type == 1025 and self.renderedText.collidepoint(event.pos):
             self.functions()
         if event.type == 1024:
