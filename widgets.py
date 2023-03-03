@@ -138,7 +138,7 @@ class dragRect():
     def dealEvent(self, event: pygame.event.Event):
         if event == pygame.MOUSEBUTTONDOWN and (self.renderedRect.collidepoint(event.pos)):
             self.active = True
-        if event == pygame.MOUSEBUTTONUP and (self.renderedRect.collidepoint(event.pos)):
+        if event == pygame.MOUSEBUTTONUP:
             self.active = False
         if event == pygame.MOUSEMOTION and self.active and self.renderedRect.collidepoint(event.pos):
             self.backgroundColor = self.colorInAcitve
