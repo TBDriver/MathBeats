@@ -3,7 +3,7 @@ from widgets import *
 from time import sleep, strftime
 from mutagen.mp3 import MP3
 import tkinter
-from tkinter import *
+from tkinter import filedialog
 
 class MathBeatsScoreEditor:
     def __fontInit(self):
@@ -240,7 +240,13 @@ class MathBeatsScoreEditor:
         if Inf[5] != "" and os.path.isfile(Inf[5]): # 检测是否是正常歌曲文件
             Inf[4] = (MP3(Inf[5]).info.length)
         else:
-            Inf[4] = "0:30"
+            Inf[4] = "3000"
+        # 基础变量
+        global changeInfActive
+        localTick = 0 # 单位毫秒
+        localNoteInf = [["每拍停顿时间"], "题目", "正确与否", "特效ID", ["无音效BeatID"], "拍后间隔"]
+        localSongInf = ["未命名歌曲", "未命名曲师", "未命名谱师", "未指定难度", "200", "0", "路径"]
+        changeInfActive = False
         # 函数-创建或应用Note
         def createNote():
             eachNoteTick = []  # 每拍时长以及当前时长
@@ -291,8 +297,9 @@ class MathBeatsScoreEditor:
             changeInfActive = not changeInfActive
         # 函数-选择歌曲文件
         def selectSongFile():
-            temp = tkinter.
-            localSongInf[6] = temp
+            temp = tkinter.Tk()
+            temp.withdraw()
+            localSongInf[6] = filedialog.askopenfilenames()# filetypes=[("MP3音乐文件", ".mp3")], title="选择歌曲文件", parent=temp
         # 函数-保存歌曲信息
         def saveSongInfData():
             if changeInfActive:
@@ -320,16 +327,11 @@ class MathBeatsScoreEditor:
         saveSongInfButton = createButton("保存信息", 35, self.z准雅宋, (255, 255, 240), 590, 450, self.Main_Screen, self.Antialias, saveSongInfData)
         # 复选框初始化
         checkIfCheckBox = checkBox(self.Main_Screen, 1054-52, 250, 50, 3, True)
+        # 拖拽Rect初始化
+        chooseLengthRect = dragRect(self.Main_Screen, 0, 10, 15, 100, (255, 255, 255), (0, 0, 0), int(localSongInf[4]))
         # 字体预载
-        tipFont = pygame.font.Font(self.s狮尾四季春, 20)
-        # 基础变量
-        global changeInfActive
-        localTick = 0 # 单位毫秒
-        localNoteInf = [["每拍停顿时间"], "题目", "正确与否", "特效ID", ["无音效BeatID"], "拍后间隔"]
-        localSongInf = ["未命名歌曲", "未命名曲师", "未命名谱师", "未指定难度", "200", "0", "路径"]
-        changeInfActive = False
+        tipFont = pygame.font.Font(self.s狮尾四季春, 20)    
         changeInfEvents = [songNameInputBox, composerInputBox, geneticistNameInputBox, BPMInputBox, difficultyInputBox, inReverseChangeInfButton, selectSongInfButton, saveSongInfButton]
-        
         
         while self.editScoreWhile:
             self.Main_Screen.fill((34, 40, 49))
@@ -360,6 +362,9 @@ class MathBeatsScoreEditor:
             checkIfCheckBox.draw()
             self.Main_Screen.blit(tipFont.render("正确与否:", self.Antialias, (255, 255, 240)), (1054-148, 256))
             
+            # 拖拽Rect
+            chooseLengthRect.draw()
+
             # 是否更改信息
             if changeInfActive:
                 changeInf()
@@ -382,6 +387,7 @@ class MathBeatsScoreEditor:
             
             
             for event in pygame.event.get():
+                print(event)
                 if event.type == pygame.QUIT:
                     # 卸载所有模块
                     pygame.quit()
@@ -401,6 +407,8 @@ class MathBeatsScoreEditor:
                 changeSongInfButton.dealEvent(event)
                 # 复选框更新事件
                 checkIfCheckBox.dealEvent(event)
+                # 拖拽Rect更新事件
+                chooseLengthRect.dealEvent(event)
                 if changeInfActive:
                     for i in range(len(changeInfEvents)):
                         changeInfEvents[i].dealEvent(event)
