@@ -2,7 +2,8 @@ import pygame, os
 from widgets import *
 from time import sleep, strftime
 from mutagen.mp3 import MP3
-from tkinter import filedialog
+import tkinter
+from tkinter import *
 
 class MathBeatsScoreEditor:
     def __fontInit(self):
@@ -290,7 +291,8 @@ class MathBeatsScoreEditor:
             changeInfActive = not changeInfActive
         # 函数-选择歌曲文件
         def selectSongFile():
-            localSongInf[6] = filedialog.askopenfilename(filetypes=[("MP3音乐文件", ".mp3")], title="选择音乐文件")
+            temp = tkinter.
+            localSongInf[6] = temp
         # 函数-保存歌曲信息
         def saveSongInfData():
             if changeInfActive:
