@@ -1,1 +1,0 @@
-pyinstaller -F -w main.py -p scoreEditor.py -p widgets.py --hidden-import scoreEditor --hidden-import widgets
