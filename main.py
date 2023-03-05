@@ -134,7 +134,7 @@ class MathBeats():
                     exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.gameState = "play"  # 目前直接衔接到游玩系统
-                    keep_screen = False
+                    keep_screen = False 
                     break  # 退出循环因为标题画面已关
                 
             sleep(1/self.gameFPS)
@@ -416,7 +416,6 @@ class MathBeats():
             sleep(0.02)
         threading.Thread(target=temp).start()
         copy("3inx")
-        
     
     def start(self):
         self.Keep_Flip()
