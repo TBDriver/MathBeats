@@ -424,7 +424,6 @@ class MathBeats():
         webbrowser.open("https://tbdriver.lanzouo.com/b0382zldi")
         def temp(): 
             showinfo("密码提示", "文件夹密码为3inx\n已复制到粘贴板!")
-            sleep(0.02)
         threading.Thread(target=temp).start()
         copy("3inx")
     
