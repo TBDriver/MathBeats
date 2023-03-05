@@ -297,12 +297,12 @@ class MathBeats():
         self.selectSongWhileLock = True
         
         returnButton = createButton(" ← ", 40, self.notoSansHansBold, (202, 207, 210), 20, 20, self.Main_Screen, self.Antialias, self.selectSongReturnToTheMainScreen)
-        selectButtonList = []
+        self.selectButtonList = []
         for i in range(len(Song_List)):
             if i == 0:
-                selectButtonList.append(createButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210), 180, 430, self.Main_Screen, self.Antialias, self.getIntoGame))
+                self.selectButtonList.append(createButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210), 180, 430, self.Main_Screen, self.Antialias, self.getIntoGame))
             else:
-                selectButtonList.append(createButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210), 320 * (i+1) - 140, 430, self.Main_Screen, self.Antialias, self.getIntoGame))
+                self.selectButtonList.append(createButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210), 320 * (i+1) - 140, 430, self.Main_Screen, self.Antialias, self.getIntoGame))
         songTitle = pygame.font.Font(self.z准雅宋, 35)
         while self.selectSongWhileLock:
             self.Main_Screen.fill((34, 40, 49))
@@ -314,9 +314,8 @@ class MathBeats():
                 if i == 0:
                     self.Main_Screen.blit(songTitle.render(Song_List[i][0], self.Antialias, (202, 207, 210)), (125, 140))  # 渲染文字
                 else:
-                    self.Main_Screen.blit(songTitle.render(Song_List[i][0], self.Antialias, (202, 207, 210)), (
-                        110 * (i+1) + (pygame.font.Font.size(songTitle, Song_List[i-1][0]))[0], 140))  # 渲染文字
-                selectButtonList[i].draw()
+                    self.Main_Screen.blit(songTitle.render(Song_List[i][0], self.Antialias, (202, 207, 210)), (110 * (i+1) + (pygame.font.Font.size(songTitle, Song_List[i-1][0]))[0], 140))  # 渲染文字
+                self.selectButtonList[i].draw()
             returnButton.draw()
             
             for event in pygame.event.get():
@@ -328,18 +327,30 @@ class MathBeats():
                 
                 returnButton.dealEvent(event)
                 for i in range(len(Song_List)):
-                    selectButtonList[i].dealEvent(event)
+                    self.selectButtonList[i].dealEvent(event)
                 
             sleep(1/self.gameFPS)
             pygame.display.update()
     
     # 游玩
     def getIntoGame(self):
-        '''
-        你先别急
-        如函数名
-        '''
-        pass
+        for i in range(len(self.selectButtonList)):
+            if (self.selectButtonList[i].renderedText).collidepoint(pygame.mouse.get_pos()):
+                songIndex = i
+        self.eventStack[0] = 1
+        self.beforeChangeTo(self._renderStartGame)
+        self.eventStack[1] = 1
+        self.afterChangeTo(self._renderChosingGame)
+        playingWhile = True
+        with open(".\\data\\music\\" + Song_List[songIndex][0] + "\\score.json", "r", encoding="utf-8") as song:
+            score = json.load(song)
+        with open(".\\data\\music\\" + Song_List[songIndex][0] + "\\song.ini", "r", encoding="utf-8") as song:
+            songInf = song.read().split("\n")
+        while playingWhile:
+            pass
+            
+            
+            
     
     # 基本函数
     def Keep_Flip(self):
