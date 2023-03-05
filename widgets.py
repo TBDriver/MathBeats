@@ -116,37 +116,40 @@ class checkBox():
     def returnAcitve(self) -> bool:
         return self.active
 
-class dragRect():
-    def __init__(self, renderSurface: pygame.Surface, boxX: int, boxY: int, weigh: int, height: int, colorInActive: tuple, colorActive: tuple, fullLength):
+class dragLine():
+    def __init__(self, renderSurface: pygame.Surface, lineX: int, lineY: int, weigh: int, height: int, fullLength, lineColor: tuple, pointColor: tuple):
         self.renderSurface = renderSurface
-        self.boxX = boxX
-        self.boxY = boxY
+        self.lineColor = lineColor
+        self.pointColor = pointColor
+        self.lineX = lineX
+        self.buttonX = lineX
+        self.lineY = lineY
+        self.buttonY = lineY
         self.weigh = weigh
         self.height = height
-        self.colorInAcitve = colorInActive
-        self.colorAcitve = colorActive
-        self.backgroundColor = self.colorInAcitve
+        self.fullLength = fullLength
         self.active = False
         self.LocalLength = 0
-        self.fullLength = fullLength
-        self.lengthPerBit = self.fullLength / 1054
-        self.renderedRect = pygame.draw.rect(self.renderSurface, self.backgroundColor, pygame.Rect(self.boxX, self.boxY, self.weigh, self.height))
-    
+        self.volumeButton = pygame.draw.circle(self.renderSurface, self.pointColor, (self.lineX, self.lineY + self.height / 2), 10, width=0)
+        
     def draw(self):
-        self.renderedRect = pygame.draw.rect(self.renderSurface, self.backgroundColor, pygame.Rect(self.boxX, self.boxY, self.weigh, self.height))
+        pygame.draw.line(self.renderSurface, self.lineColor, (self.lineX, self.lineY), (self.lineX + self.weigh, self.lineY), 4)
+        self.volumeButton = pygame.draw.circle(self.renderSurface, self.pointColor, (self.buttonX, self.buttonY + self.height / 2), 10, width=0)
     
     def dealEvent(self, event: pygame.event.Event):
-        if event == pygame.MOUSEBUTTONDOWN and (self.renderedRect.collidepoint(event.pos)):
+        if event.type == pygame.MOUSEBUTTONDOWN and (self.volumeButton.collidepoint(event.pos)):
             self.active = True
-        if event == pygame.MOUSEBUTTONUP:
+        if event.type == pygame.MOUSEBUTTONUP:
             self.active = False
-        if event == pygame.MOUSEMOTION and self.active and self.renderedRect.collidepoint(event.pos):
-            self.backgroundColor = self.colorInAcitve
-            self.boxX = self.boxX + event.rel[0]
-            self.LocalLength = self.boxX * self.lengthPerBit # 进行时长自增
-            print(self.LocalLength)
-        if self.active:
-            print("active")
+        if event.type == pygame.MOUSEMOTION and self.active:
+            if self.buttonX < self.lineX:
+                self.buttonX = self.lineX
+            elif self.buttonX > self.lineX + self.weigh:
+                self.buttonX = self.lineX + self.weigh
+            else:
+                self.buttonX = self.buttonX + event.rel[0]
+            self.LocalLength = (self.buttonX - self.lineX) * (self.fullLength / self.weigh)   # 进行时长自增
     
     def getText(self):
         return self.LocalLength
+    

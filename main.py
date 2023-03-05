@@ -1,33 +1,36 @@
 # -*- coding:utf-8 -*-
 
+import pygame.freetype
+from sys import exit, argv
+from clipboard import copy
 from time import sleep, gmtime
-from sys import exit
-from mutagen.mp3 import MP3
-import os, pygame, json
+from os import mkdir, path, listdir
+from tkinter.messagebox import showinfo
+import pygame, json, threading, webbrowser
 
 from widgets import *
 from scoreEditor import MathBeatsScoreEditor
 
 pygame.init()
 # 加载文件,存档与设置
-try:os.mkdir(".\config")
+try:mkdir(".\config")
 except:pass
-try:os.mkdir(".\data")
+try:mkdir(".\data")
 except:pass
-try:os.mkdir(".\cache")
+try:mkdir(".\cache")
 except:pass
 with open(".\config\config.mb", "r+") as f:
     READ_CONFIG_DATA = f.read()  # 读取设置
     CONFIG_DATA = READ_CONFIG_DATA.split("\n")
 with open(".\config\save.mb", "r+") as f:
     global Save_Time
-    Save_Time = gmtime(os.path.getmtime(".\config\save.mb"))
+    Save_Time = gmtime(path.getmtime(".\config\save.mb"))
 
 # 加载歌曲
 global Song_List
 Song_List = []
 Score_List = []
-Songs = os.listdir(".\data\music")
+Songs = listdir(".\data\music")
 for i in range(len(Songs)):  # 查找歌曲
     Song_List.append([])  # 增加一首歌的槽位
     with open(".\data\music\\" + Songs[i-1] + "\song.ini", encoding='utf-8') as f:
@@ -49,9 +52,9 @@ class MathBeats():
         '''字体路径初始化'''
         self.z准雅宋 = ".\\data\\ttf\\方正准雅宋简体.ttf"
         self.notoSansHansBold = ".\\data\\ttf\\NotoSansHans-Bold.otf"
-        self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
         self.notoSansHansRegular = ".\\data\\ttf\\NotoSansHans-Regular.otf"
-        self.s狮尾四季春 = ".\\data\\ttf\\狮尾四季春-Regular.ttf"
+        # self.notoSansHansLight = ".\\data\\ttf\\NotoSansHans-Light.otf"
+        # self.s狮尾四季春 = ".\\data\\ttf\\狮尾四季春-Regular.ttf"
     def __eventBusyOrNot(self, event: int):
         '''
         检测时间栈是否繁忙 返回0或1
@@ -64,8 +67,9 @@ class MathBeats():
     def __loadingPictures(self):
         self.songFrame = pygame.transform.scale(pygame.image.load(".\\data\\img\\frame.png").convert_alpha(), (400, 400))
         self.Title_img = pygame.transform.scale(pygame.image.load(".\data\img\Title.png").convert_alpha(), (400, 400))
-        self.Masks_img_1 = pygame.image.load(".\data\img\Mask1.png").convert_alpha()
-        self.Masks_img_2 = pygame.image.load(".\data\img\Mask2.png").convert_alpha()
+        self.MathImg = pygame.transform.scale(pygame.image.load(".\data\img\Math.png").convert_alpha(), (400, 200))
+        self.BeatsImg= pygame.transform.scale(pygame.image.load(".\data\img\Beats.png").convert_alpha(), (400, 200))
+        self.Mask = pygame.image.load(".\data\img\Mask.png").convert_alpha()
     def __offset(self):
         self.offset = [(0, 0), (0, 0, 0)]  # 偏移值
         '''
@@ -81,10 +85,12 @@ class MathBeats():
         self.LastM1 = 0
         self.LastM2 = 0
         self.eventStack = [0, 0, 0]  # 加载等待ID
-
+        self.version = "0.0.1"
+        
         self.__fontInit()        # 文字封装初始化
         self.__loadingPictures() # 图片初始化
         self.__offset()          # 偏移值
+        pygame.freetype.init()
         pygame.font.init()       # 文字库初始化
         pygame.display.set_caption("Mathbeats")
         '''
@@ -102,10 +108,14 @@ class MathBeats():
     # 过渡函数
     def _renderStartGame(self):
         # _renderStartGame作为加载时预处理的图像
-        (createButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 420, 100,
-                             self.Main_Screen, self.Antialias, self.__returnSaveNone)).draw()
-        (createButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 420, 300,
-                             self.Main_Screen, self.Antialias, self.__returnSaveNone)).draw()
+        self.Main_Screen.blit(self.BeatsImg, self.BeatsImgDect)
+        self.Main_Screen.blit(self.MathImg, self.MathImgDect)
+        createButton("获取更新", 50, self.z准雅宋, (255, 255, 255), 420, 500,
+                                self.Main_Screen, self.Antialias, self.checkUpdate)
+        createButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 420, 400,
+                                self.Main_Screen, self.Antialias, self.getIntoScoreEditor)
+        createButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 420, 300,
+                                self.Main_Screen, self.Antialias, self.selectSong)
     def _renderChosingGame(self):
         pass
 
@@ -127,7 +137,6 @@ class MathBeats():
                     keep_screen = False
                     break  # 退出循环因为标题画面已关
                 
-
             sleep(1/self.gameFPS)
             pygame.display.flip()  # 更新屏幕内容
 
@@ -147,60 +156,20 @@ class MathBeats():
         else:
             def afterFunction():
                 pass
-        '''
-        一个大坑,是类似于Arc的平滑移动
-        
-        sMask1_x = -670 # 基本值
-        sMask2_x = 1736
-        
-        Mask1_x = -670
-        Mask2_x = 1736
-        temptick = 0
-        Mask_state = "right"
-        while True:
-            print("Mask1_x:" + str(Mask1_x))
-            print("Mask2_x:" + str(Mask2_x))
-            
-            self.Main_Screen.blit(self.Masks_img_1,(Mask1_x,0))
-            self.Main_Screen.blit(self.Masks_img_2,(Mask2_x,0))
-            
-            if Mask1_x >= 527:
-                Mask_state = "left"
-                temptick = 0         
-            if Mask_state == "right":
-                Mask1_x = Mask1_x + 670 * int(self.Mask_Smooth[temptick])
-                Mask2_x = sMask2_x * (1 - self.Mask_Smooth[temptick])
-                temptick += 1  
-            if Mask_state == "left":
-                print(self.Mask_Smooth)
-                Mask1_x = Mask1_x - 670 * self.Mask_Smooth[temptick]
-                Mask2_x = sMask2_x * (1 - self.Mask_Smooth[temptick])
-                temptick += 1
-                
-            sleep(1/self.gameFPS)
-            pygame.display.flip() #更新屏幕内容
-        '''
-
-        Mask1_x = -810
-        Mask2_x = 880
+        maskAlpha = 0
         inWhile = True
         while inWhile:  # 不断尝试进行加载
             while (self.eventStack[0] and not (self.__eventBusyOrNot(self.eventStack[0]))):
                 self.Main_Screen.fill((34, 40, 49))
                 preFunction()
-                if Mask1_x >= 0:
+                maskAlpha += 5
+                self.Mask.set_alpha(maskAlpha)
+                if maskAlpha >= 256:
                     sleep(0.2)
-                    self.LastM1 = Mask1_x
-                    self.LastM2 = Mask2_x
                     inWhile = False
                     self.eventStack[0] = 0
                     break
-                Mask1_x += 820/self.gameFPS + 2
-                Mask2_x -= 800/self.gameFPS + 2
-                
-                self.Main_Screen.blit(self.Masks_img_1, (Mask1_x, 0))
-                self.Main_Screen.blit(self.Masks_img_2, (Mask2_x, 0))
-
+                self.Main_Screen.blit(self.Mask, (0, 0))
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         # 卸载所有模块
@@ -217,23 +186,19 @@ class MathBeats():
         else:
             def afterFunctions():
                 pass
-        Mask1_x = self.LastM1
-        Mask2_x = self.LastM2
+        maskAlpha = 256
         inWhile = True
         while inWhile:
             while self.eventStack[1] and not (self.__eventBusyOrNot(self.eventStack[1])):
                 self.Main_Screen.fill((34, 40, 49))
                 preFunction()
-                
-                if Mask1_x <= -810:
+                maskAlpha -= 5
+                if maskAlpha <= 0:
                     inWhile = False
                     self.eventStack[1] = 0
                     break
-                Mask1_x -= 820/self.gameFPS + 2
-                Mask2_x += 800/self.gameFPS + 2
-
-                self.Main_Screen.blit(self.Masks_img_1, (Mask1_x, 0))
-                self.Main_Screen.blit(self.Masks_img_2, (Mask2_x, 0))
+                self.Mask.set_alpha(maskAlpha)
+                self.Main_Screen.blit(self.Mask, (0, 0))
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         # 卸载所有模块
@@ -263,20 +228,51 @@ class MathBeats():
     def Main_Screen_(self):
         '''主界面'''
         self.mainScreenLock = True
+        self.MathImgDect = (-400, 0)
+        self.BeatsImgDect = (1054, 0)
+        
         self.eventStack[0] = 1
         self.beforeChangeTo(self.__returnSaveNone)
         self.eventStack[1] = 1
         self.afterChangeTo(self._renderStartGame)
 
-        startGameButton = createButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 420, 100,
+        startGameButton = createButton("开始游戏", 50, self.z准雅宋, (255, 255, 255), 420, 300,
                                 self.Main_Screen, self.Antialias, self.selectSong)
-        scoreEditButton = createButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 420, 300,
+        scoreEditButton = createButton("谱面创作", 50, self.z准雅宋, (255, 255, 255), 420, 400,
                                 self.Main_Screen, self.Antialias, self.getIntoScoreEditor)
+        updateButton = createButton("获取更新", 50, self.z准雅宋, (255, 255, 255), 420, 500,
+                                self.Main_Screen, self.Antialias, self.checkUpdate)
+        mathXYmoving = [True, True]
+        beatsXYmoving = [True, True]
+        versionFont = pygame.font.Font(self.notoSansHansRegular, 20)
         while self.mainScreenLock:
             self.Main_Screen.fill((34, 40, 49))
-            
+
+            if mathXYmoving[0] or mathXYmoving[1]:
+                if self.MathImgDect[0] >= 280:
+                    mathXYmoving[0] = False
+                if self.MathImgDect[1] >= 25:
+                    mathXYmoving[1] = False
+                if mathXYmoving[0]:
+                    self.MathImgDect = (self.MathImgDect[0] + 5, self.MathImgDect[1])
+                if mathXYmoving[1]:
+                    self.MathImgDect = (self.MathImgDect[0], self.MathImgDect[1] + 1)
+            if beatsXYmoving[0] or beatsXYmoving[1]:
+                if self.BeatsImgDect[0] <= 450:
+                    beatsXYmoving[0] = False
+                if self.BeatsImgDect[1] >= 100:
+                    beatsXYmoving[1] = False
+                if beatsXYmoving[0]:
+                    self.BeatsImgDect = (self.BeatsImgDect[0] - 5, self.BeatsImgDect[1])
+                if beatsXYmoving[1]:
+                    self.BeatsImgDect = (self.BeatsImgDect[0], self.BeatsImgDect[1] + 1)
             startGameButton.draw()
             scoreEditButton.draw()
+            updateButton.draw()
+            self.Main_Screen.blit(self.BeatsImg, self.BeatsImgDect)
+            self.Main_Screen.blit(self.MathImg, self.MathImgDect)
+            
+            self.Main_Screen.blit(versionFont.render("Version " + self.version, self.Antialias, (255, 255, 240)), (10, 580))
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -286,6 +282,7 @@ class MathBeats():
                     exit()
                 startGameButton.dealEvent(event)
                 scoreEditButton.dealEvent(event)
+                updateButton.dealEvent(event)
                 
             sleep(1/self.gameFPS)
             pygame.display.flip()
@@ -306,7 +303,7 @@ class MathBeats():
                 selectButtonList.append(createButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210), 180, 430, self.Main_Screen, self.Antialias, self.getIntoGame))
             else:
                 selectButtonList.append(createButton("  →  ", 35, self.notoSansHansBold, (202, 207, 210), 320 * (i+1) - 140, 430, self.Main_Screen, self.Antialias, self.getIntoGame))
-        
+        songTitle = pygame.font.Font(self.z准雅宋, 35)
         while self.selectSongWhileLock:
             self.Main_Screen.fill((34, 40, 49))
             
@@ -315,10 +312,10 @@ class MathBeats():
                 self.Main_Screen.blit(songFrame, (320 * i, 100))
                 # 歌曲标题
                 if i == 0:
-                    self.Main_Screen.blit((pygame.font.Font(self.z准雅宋, 35)).render(Song_List[i][0], self.Antialias, (202, 207, 210)), (125, 140))  # 渲染文字
+                    self.Main_Screen.blit(songTitle.render(Song_List[i][0], self.Antialias, (202, 207, 210)), (125, 140))  # 渲染文字
                 else:
-                    self.Main_Screen.blit((pygame.font.Font(self.z准雅宋, 35)).render(Song_List[i][0], self.Antialias, (202, 207, 210)), (
-                        110 * (i+1) + (pygame.font.Font.size(pygame.font.Font(self.z准雅宋, 35), Song_List[i-1][0]))[0], 140))  # 渲染文字
+                    self.Main_Screen.blit(songTitle.render(Song_List[i][0], self.Antialias, (202, 207, 210)), (
+                        110 * (i+1) + (pygame.font.Font.size(songTitle, Song_List[i-1][0]))[0], 140))  # 渲染文字
                 selectButtonList[i].draw()
             returnButton.draw()
             
@@ -361,6 +358,66 @@ class MathBeats():
 
             sleep(1/self.gameFPS)
             pygame.display.flip()  # 更新屏幕内容
+    def checkUpdate(self):
+        '''
+        requrl = requests.get('http://tbdriver.byethost24.com/Version/MathBeats/version.txt', {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63",
+            "Cookie": "__test=4f2cfc7fd2504d75d0824c07a612ed1f"
+        })
+        req = requrl.text
+
+        if req == version: # 是最新版本
+            pass
+        else:
+            def temp():
+                showinfo("正在进行更新", "检测到有新版本,请耐心等待自动更新~")
+            t = threading.Thread(target=temp)
+            t.start()
+            
+            # 重试次数
+            global times, updateError
+            times = 0
+            updateError = 0
+            def tryFiles():
+                global times
+                if times <= 5:
+                    try:
+                        with open(".\\cache\\newVersion.zip", "wb") as f:
+                            tempFile = bytes(((requests.get('https://developer.lanzoug.com/file/?CG4HOQEwAjNTWgoyCz5cMFNsV29S5AqfV+BTsFaWA51VsgXIXYRTSlNsVGxXZlU3AytTN1BpVyEDJAcwB3VTYwg8B34BaAJ4U38KNQsvXHtTb1c7UmEKbVcPUzxWbgM/VWwFZl01Uz9TMFQwVzBVYwN/UzBQfFdoAzUHOAdiU2UIPQdgAWgCZlMjCiwLL1xgUztXYlI/CjpXf1NkVjgDLVVnBWZdL1NkUzRUOlc2VTcDO1MyUG1XZwMxBzkHPlM3CDkHMQE6AmRTMgo/C2lcP1M4V2ZSaQprV2hTMFY+A2ZVZQVhXTFTKVN/VGtXc1VyAyxTJVBqVycDbQdlB2ZTYAg9B2ABZQJvUz0Kawt5XClTYFc/UmgKbldtU2RWPAM1VW0FYl0wUzZTN1QxVztVegN3U3BQaVc5A3MHPAdqU2QIPwdkAW8CYVM1Cm8LaVxvUy9XJ1J9Cn9XbVNkVjwDNVVkBWpdNFMxUzJUNVcyVXIDLFM/UH9XaAM1BzMHb1N8CDoHZAFsAnhTMgplC3FcbFM4V2o=', {
+                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63",
+                            }))).text)
+                            f.write(tempFile)
+                    except:
+                        times += 1
+                        tryFiles()
+                else:
+                    showinfo("出现错误", "下载更新文件失败..")
+                    global updateError
+                    updateError = 1
+            tryFiles()
+            if not updateError:
+                with zipfile.ZipFile(".\\cache\\newVersion.zip") as zf:
+                    zf.extractall()
+                with open(".\\cache\\isUpdate", "w+", encoding="utf-8") as f:
+                    f.write("true")
+                b = open(".\\cache\\upgrade.bat",'w')
+                TempList = "@echo off\n";                           # 关闭bat脚本的输出
+                TempList += "if not exist "+"MathBeats.exe"+" exit \n";    # 新文件不存在,退出脚本执行
+                TempList += "sleep 3\n"                             # 3秒后删除旧程序（3秒后程序已运行结束，不延时的话，会提示被占用，无法删除）
+                TempList += "del "+ path.realpath(argv[0]) + "\n"    # 删除当前文件
+                TempList += "start " + "MathBeats.exe"                     # 启动新程序
+                b.close()
+                Popen(".\\cache\\upgrade.bat")
+                exit()
+        '''
+        webbrowser.open("https://tbdriver.lanzouo.com/b0382zldi")
+        def temp(): 
+            showinfo("密码提示", "文件夹密码为3inx\n已复制到粘贴板!")
+            sleep(0.02)
+        threading.Thread(target=temp).start()
+        copy("3inx")
+        
+    
     def start(self):
         self.Keep_Flip()
 
