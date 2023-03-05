@@ -14,7 +14,7 @@ from scoreEditor import MathBeatsScoreEditor
 pygame.init()
 # 加载文件,存档与设置
 for i in [".\config", ".\data", ".\cache", ".\data\img", ".\data\music", ".\data\sound", "\\ttf"]:
-    if not i:
+    if not path.isdir(i):
         mkdir(i)
 with open(".\config\config.mb", "r+") as f:
     READ_CONFIG_DATA = f.read()  # 读取设置
@@ -321,9 +321,12 @@ class MathBeats():
                     pygame.quit()
                     # 终止程序，确保退出程序
                     exit()
-                
+                for i in self.selectButtonList:
+                    i.dealEvent(event)
                 returnButton.dealEvent(event)
-
+            
+            sleep(1/self.gameFPS)
+            pygame.display.flip()  # 更新屏幕内容
     def getIntoGame(self):
         for i in range(len(self.selectButtonList)):
             if (self.selectButtonList[i].renderedText).collidepoint(pygame.mouse.get_pos()):
