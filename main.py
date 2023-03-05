@@ -13,12 +13,9 @@ from scoreEditor import MathBeatsScoreEditor
 
 pygame.init()
 # 加载文件,存档与设置
-try:mkdir(".\config")
-except:pass
-try:mkdir(".\data")
-except:pass
-try:mkdir(".\cache")
-except:pass
+for i in [".\config", ".\data", ".\cache", ".\data\img", ".\data\music", ".\data\sound", "\\ttf"]:
+    if not i:
+        mkdir(i)
 with open(".\config\config.mb", "r+") as f:
     READ_CONFIG_DATA = f.read()  # 读取设置
     CONFIG_DATA = READ_CONFIG_DATA.split("\n")
@@ -326,13 +323,7 @@ class MathBeats():
                     exit()
                 
                 returnButton.dealEvent(event)
-                for i in range(len(Song_List)):
-                    self.selectButtonList[i].dealEvent(event)
-                
-            sleep(1/self.gameFPS)
-            pygame.display.update()
-    
-    # 游玩
+
     def getIntoGame(self):
         for i in range(len(self.selectButtonList)):
             if (self.selectButtonList[i].renderedText).collidepoint(pygame.mouse.get_pos()):
@@ -348,13 +339,10 @@ class MathBeats():
             songInf = song.read().split("\n")
         while playingWhile:
             pass
-            
-            
-            
     
     # 基本函数
     def Keep_Flip(self):
-        while True:
+        while 1:
             # 游戏状态为 开始游戏
             if self.gameState == "start":
                 self.Start_Screen()  # 进入开始屏幕的循环
@@ -370,57 +358,7 @@ class MathBeats():
             sleep(1/self.gameFPS)
             pygame.display.flip()  # 更新屏幕内容
     def checkUpdate(self):
-        '''
-        requrl = requests.get('http://tbdriver.byethost24.com/Version/MathBeats/version.txt', {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63",
-            "Cookie": "__test=4f2cfc7fd2504d75d0824c07a612ed1f"
-        })
-        req = requrl.text
-
-        if req == version: # 是最新版本
-            pass
-        else:
-            def temp():
-                showinfo("正在进行更新", "检测到有新版本,请耐心等待自动更新~")
-            t = threading.Thread(target=temp)
-            t.start()
-            
-            # 重试次数
-            global times, updateError
-            times = 0
-            updateError = 0
-            def tryFiles():
-                global times
-                if times <= 5:
-                    try:
-                        with open(".\\cache\\newVersion.zip", "wb") as f:
-                            tempFile = bytes(((requests.get('https://developer.lanzoug.com/file/?CG4HOQEwAjNTWgoyCz5cMFNsV29S5AqfV+BTsFaWA51VsgXIXYRTSlNsVGxXZlU3AytTN1BpVyEDJAcwB3VTYwg8B34BaAJ4U38KNQsvXHtTb1c7UmEKbVcPUzxWbgM/VWwFZl01Uz9TMFQwVzBVYwN/UzBQfFdoAzUHOAdiU2UIPQdgAWgCZlMjCiwLL1xgUztXYlI/CjpXf1NkVjgDLVVnBWZdL1NkUzRUOlc2VTcDO1MyUG1XZwMxBzkHPlM3CDkHMQE6AmRTMgo/C2lcP1M4V2ZSaQprV2hTMFY+A2ZVZQVhXTFTKVN/VGtXc1VyAyxTJVBqVycDbQdlB2ZTYAg9B2ABZQJvUz0Kawt5XClTYFc/UmgKbldtU2RWPAM1VW0FYl0wUzZTN1QxVztVegN3U3BQaVc5A3MHPAdqU2QIPwdkAW8CYVM1Cm8LaVxvUy9XJ1J9Cn9XbVNkVjwDNVVkBWpdNFMxUzJUNVcyVXIDLFM/UH9XaAM1BzMHb1N8CDoHZAFsAnhTMgplC3FcbFM4V2o=', {
-                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63",
-                            }))).text)
-                            f.write(tempFile)
-                    except:
-                        times += 1
-                        tryFiles()
-                else:
-                    showinfo("出现错误", "下载更新文件失败..")
-                    global updateError
-                    updateError = 1
-            tryFiles()
-            if not updateError:
-                with zipfile.ZipFile(".\\cache\\newVersion.zip") as zf:
-                    zf.extractall()
-                with open(".\\cache\\isUpdate", "w+", encoding="utf-8") as f:
-                    f.write("true")
-                b = open(".\\cache\\upgrade.bat",'w')
-                TempList = "@echo off\n";                           # 关闭bat脚本的输出
-                TempList += "if not exist "+"MathBeats.exe"+" exit \n";    # 新文件不存在,退出脚本执行
-                TempList += "sleep 3\n"                             # 3秒后删除旧程序（3秒后程序已运行结束，不延时的话，会提示被占用，无法删除）
-                TempList += "del "+ path.realpath(argv[0]) + "\n"    # 删除当前文件
-                TempList += "start " + "MathBeats.exe"                     # 启动新程序
-                b.close()
-                Popen(".\\cache\\upgrade.bat")
-                exit()
-        '''
+        '''检查更新'''
         webbrowser.open("https://tbdriver.lanzouo.com/b0382zldi")
         def temp(): 
             showinfo("密码提示", "文件夹密码为3inx\n已复制到粘贴板!")
