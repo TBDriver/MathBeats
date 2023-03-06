@@ -359,17 +359,11 @@ class MathBeats():
         scoreHead = 0
         scoreTail = len(score) - 1
         global questionFont
-        questionFont = pygame.font.Font(self.notoSansHansRegular, 170)
-        questionText = self.Main_Screen.blit(
-            questionFont.render(
-                score[str(scoreHead)][1],
-                self.Antialias,
-                (240, 250, 240)
-                ),
-                (1054 / 2 - pygame.font.Font.size(questionFont, score[str(scoreHead)][1])[0], 
-                600 / 2 - pygame.font.Font.size(questionFont, score[str(scoreHead)][1])[1]))
         # 按钮初始化
         self.playingGameReturnButton = createButton(" ← ", 40, self.notoSansHansBold, (202, 207, 210), 20, 20, self.Main_Screen, self.Antialias, self.playingSongReturnToTheSelectSong)
+        # 字体初始化
+        questionFont = pygame.font.Font(self.notoSansHansRegular, 170)
+        infFont = pygame.font.Font(self.notoSansHansRegular, 30)
         # 变量初始化
         playingScore = 0
         startPlayingTicks = pygame.time.get_ticks()
@@ -390,15 +384,16 @@ class MathBeats():
             self.playInf = [playingScore, songInf[0], songInf[1], songInf[2], songInf[3], songInf[4]]
         def keepPlayingSongNote():
             for i in range(len(score[str(scoreHead)][0])): # 等待每拍间隔
-                sleep(int(score[scoreHead][0][i]))
+                sleep(int(score[str(scoreHead)][0][i]))
             localNoteTick = pygame.time.get_ticks() - startPlayingTicks
-            sleep(int(score[scoreHead][0]))
-        threading.Thread(target = keepPlayingSongNote).start()
+            sleep(int(score[str(scoreHead)][0]))
+        # threading.Thread(target = keepPlayingSongNote).start()
         while self.playingWhile:
             self.Main_Screen.fill((34, 40, 49))
 
             self.playingGameReturnButton.draw()
-            questionText = self.Main_Screen.blit(questionFont.render(score[str(scoreHead)][1], self.Antialias, (29, 55, 69)), (20, 200))
+            self.Main_Screen.blit(questionFont.render(str(score[str(scoreHead)][1]), self.Antialias, (29, 55, 69)), (20, 200))
+            self.Main_Screen.blit(infFont.render("分数 {:0>7}".format(str(self.playInf[0])), self.Antialias, (255, 255, 240)), (100, 20))
             
             """updateFont()
 
