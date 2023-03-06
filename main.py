@@ -66,6 +66,7 @@ class MathBeats():
         self.Title_img = pygame.transform.scale(pygame.image.load(".\data\img\Title.png").convert_alpha(), (400, 400))
         self.MathImg = pygame.transform.scale(pygame.image.load(".\data\img\Math.png").convert_alpha(), (400, 200))
         self.BeatsImg= pygame.transform.scale(pygame.image.load(".\data\img\Beats.png").convert_alpha(), (400, 200))
+        self.songFrame = pygame.transform.scale(pygame.image.load(".\\data\\img\\frame.png").convert_alpha(), (400, 400))
         self.Mask = pygame.image.load(".\data\img\Mask.png").convert_alpha()
     def __offset(self):
         self.offset = [(0, 0), (0, 0, 0)]  # 偏移值
@@ -217,6 +218,8 @@ class MathBeats():
         self.eventStack[1] = 1
         sleep(0.005)
         self.afterChangeTo(self._renderStartGame)
+    def selectSongReturnToPlayingSong(self):
+        pass
     def getIntoScoreEditor(self):
         MBSE = MathBeatsScoreEditor(self.Antialias, (self.gameFPS, self.Main_Screen, self.eventStack), self.offset)
         MBSE.start()
@@ -290,7 +293,6 @@ class MathBeats():
         self.beforeChangeTo(self._renderStartGame)
         self.eventStack[1] = 1
         self.afterChangeTo(self._renderChosingGame)
-        songFrame = pygame.transform.scale(pygame.image.load(".\\data\\img\\frame.png").convert_alpha(), (400, 400))
         self.selectSongWhileLock = True
         
         returnButton = createButton(" ← ", 40, self.notoSansHansBold, (202, 207, 210), 20, 20, self.Main_Screen, self.Antialias, self.selectSongReturnToTheMainScreen)
@@ -306,7 +308,7 @@ class MathBeats():
             
             for i in range(len(Song_List)):
                 # 歌曲框
-                self.Main_Screen.blit(songFrame, (320 * i, 100))
+                self.Main_Screen.blit(self.songFrame, (320 * i, 100))
                 # 歌曲标题
                 if i == 0:
                     self.Main_Screen.blit(songTitle.render(Song_List[i][0], self.Antialias, (202, 207, 210)), (125, 140))  # 渲染文字
@@ -340,8 +342,19 @@ class MathBeats():
             score = json.load(song)
         with open(".\\data\\music\\" + Song_List[songIndex][0] + "\\song.ini", "r", encoding="utf-8") as song:
             songInf = song.read().split("\n")
+        # 谱面读取队列
+        scoreHead = 0
+        scoreTail = len(score)-1
+        # 文本
+        questionFont = pygame.font.Font(self.notoSansHansRegular, 32)
+        def updateFonts():
+            '''更新字体大小'''
+            questionFont = pygame.font.Font(self.notoSansHansRegular, self.questionSurface.get_width())    
+        updateFonts()
         while playingWhile:
-            pass
+            # 字体识别算法
+            updateFonts()
+            self.Main_Screen.blit(questionSurface)
     
     # 基本函数
     def Keep_Flip(self):
