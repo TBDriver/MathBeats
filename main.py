@@ -84,6 +84,9 @@ class MathBeats():
         self.eventStack = [0, 0, 0]  # 加载等待ID
         self.version = "0.0.1"
         
+        self.playInf = [0, "歌曲", "曲师", "谱师", "难度 int", "BPM int"]
+
+
         self.__fontInit()        # 文字封装初始化
         self.__loadingPictures() # 图片初始化
         self.__offset()          # 偏移值
@@ -115,7 +118,9 @@ class MathBeats():
                                 self.Main_Screen, self.Antialias, self.selectSong)
     def _renderChosingGame(self):
         pass
-
+    def _renderPlayingGame(self):
+        self.playingGameReturnButton.draw()
+    
     # 主界面
     def Start_Screen(self):
         keep_screen = True
@@ -217,6 +222,13 @@ class MathBeats():
         self.eventStack[1] = 1
         sleep(0.005)
         self.afterChangeTo(self._renderStartGame)
+    def playingSongReturnToTheSelectSong(self):
+        self.playingWhile = False
+        self.selectSongWhileLock = True
+        self.eventStack[0] = 1
+        self.beforeChangeTo(self._renderPlayingGame)
+        self.eventStack[1] = 1
+        self.afterChangeTo(self._renderChosingGame)
     def getIntoScoreEditor(self):
         MBSE = MathBeatsScoreEditor(self.Antialias, (self.gameFPS, self.Main_Screen, self.eventStack), self.offset)
         MBSE.start()
@@ -328,20 +340,91 @@ class MathBeats():
             sleep(1/self.gameFPS)
             pygame.display.flip()  # 更新屏幕内容
     def getIntoGame(self):
+        # 判断按钮
         for i in range(len(self.selectButtonList)):
             if (self.selectButtonList[i].renderedText).collidepoint(pygame.mouse.get_pos()):
                 songIndex = i
+        
         self.eventStack[0] = 1
         self.beforeChangeTo(self._renderStartGame)
         self.eventStack[1] = 1
         self.afterChangeTo(self._renderChosingGame)
-        playingWhile = True
+        self.playingWhile = True
+        # 读取文件
         with open(".\\data\\music\\" + Song_List[songIndex][0] + "\\score.json", "r", encoding="utf-8") as song:
             score = json.load(song)
         with open(".\\data\\music\\" + Song_List[songIndex][0] + "\\song.ini", "r", encoding="utf-8") as song:
             songInf = song.read().split("\n")
-        while playingWhile:
-            pass
+        # 队列初始化
+        scoreHead = 0
+        scoreTail = len(score) - 1
+        global questionFont
+        questionFont = pygame.font.Font(self.notoSansHansRegular, 170)
+        questionText = self.Main_Screen.blit(
+            questionFont.render(
+                score[str(scoreHead)][1],
+                self.Antialias,
+                (240, 250, 240)
+                ),
+                (1054 / 2 - pygame.font.Font.size(questionFont, score[str(scoreHead)][1])[0], 
+                600 / 2 - pygame.font.Font.size(questionFont, score[str(scoreHead)][1])[1]))
+        # 按钮初始化
+        self.playingGameReturnButton = createButton(" ← ", 40, self.notoSansHansBold, (202, 207, 210), 20, 20, self.Main_Screen, self.Antialias, self.playingSongReturnToTheSelectSong)
+        # 变量初始化
+        playingScore = 0
+        startPlayingTicks = pygame.time.get_ticks()
+        # 函数初始化
+        def updateFont():
+            '''自行判断新字的字体'''
+            global questionFont
+            """score[str(scoreHead)][1]
+            pygame.font.Font.size(questionFont, score[str(scoreHead)][1])[1]"""
+
+            i = 0
+            while 1:
+                questionFont = pygame.font.Font(self.notoSansHansRegular, i)
+                if pygame.font.Font.size(questionFont, score[str(scoreHead)][1])[0] >= 1054:
+                    break
+                i += 1
+        def updatePlayingSongInf():
+            self.playInf = [playingScore, songInf[0], songInf[1], songInf[2], songInf[3], songInf[4]]
+        def keepPlayingSongNote():
+            for i in range(len(score[str(scoreHead)][0])): # 等待每拍间隔
+                sleep(int(score[scoreHead][0][i]))
+            localNoteTick = pygame.time.get_ticks() - startPlayingTicks
+            sleep(int(score[scoreHead][0]))
+        threading.Thread(target = keepPlayingSongNote).start()
+        while self.playingWhile:
+            self.Main_Screen.fill((34, 40, 49))
+
+            self.playingGameReturnButton.draw()
+            questionText = self.Main_Screen.blit(questionFont.render(score[str(scoreHead)][1], self.Antialias, (29, 55, 69)), (20, 200))
+            
+            """updateFont()
+
+            questionText = self.Main_Screen.blit(
+                questionFont.render(
+                    score[str(scoreHead)][1],
+                    self.Antialias,
+                    (240, 250, 240)
+                    ),
+                    (int(1054 / 2 - pygame.font.Font.size(questionFont, score[str(scoreHead)][1])[0]), 
+                    int(600 / 2 - pygame.font.Font.size(questionFont, score[str(scoreHead)][1])[1])))"""
+            
+
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # 卸载所有模块
+                    pygame.quit()
+                    # 终止程序，确保退出程序
+                    exit()
+                self.playingGameReturnButton.dealEvent(event)
+            
+            updatePlayingSongInf()
+
+            sleep(1/self.gameFPS)
+            pygame.display.flip()  # 更新屏幕内容
     
     # 基本函数
     def Keep_Flip(self):
